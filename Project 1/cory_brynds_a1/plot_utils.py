@@ -17,19 +17,6 @@ plt.rcParams.update({
     "figure.titlesize": 18,
 })
 
-# Used to control plotting titles for the LaTeX-formatted plots
-plot_titles = True
-
-
-def _set_title(ax, title):
-    if plot_titles:
-        ax.set_title(title)
-
-
-def _set_suptitle(fig, title):
-    if plot_titles:
-        fig.suptitle(title)
-
 def save_fig_to_file(fig, save_path):
     os.makedirs(os.path.dirname(save_path) or ".", exist_ok=True)
     fig.savefig(save_path, dpi=150, bbox_inches="tight")
@@ -42,7 +29,7 @@ def plot_losses(epochs, ce_losses, total_losses, title="Training Losses", save_p
     ax.plot(epochs, total_losses, label="Total Loss (CE + L2)", linewidth=1.5)
     ax.set_xlabel("Epoch")
     ax.set_ylabel("Loss")
-    _set_title(ax, title)
+    ax.set_title(title)
     ax.legend(loc="best")
     ax.grid(True, linestyle="--", alpha=0.6)
     save_fig_to_file(fig, save_path)
@@ -54,7 +41,7 @@ def plot_error_rates(epochs, train_errors, test_errors, title="Error Rates", sav
     ax.plot(epochs, test_errors, label="Test Error", linewidth=1.5)
     ax.set_xlabel("Epoch")
     ax.set_ylabel("Misclassification Rate")
-    _set_title(ax, title)
+    ax.set_title(title)
     ax.legend(loc="best")
     ax.grid(True, linestyle="--", alpha=0.6)
     save_fig_to_file(fig, save_path)
@@ -69,12 +56,12 @@ def plot_sweep_errors(runs, title="Error Rate Comparison", save_path=None):
 
     ax_train.set_xlabel("Epoch")
     ax_train.set_ylabel("Misclassification Rate")
-    _set_title(ax_train, "Training Error")
+    ax_train.set_title("Training Error")
     ax_train.legend(loc="best")
     ax_train.grid(True, linestyle="--", alpha=0.6)
 
     ax_test.set_xlabel("Epoch")
-    _set_title(ax_test, "Testing Error")
+    ax_test.set_title("Testing Error")
     ax_test.legend(loc="best")
     ax_test.grid(True, linestyle="--", alpha=0.6)
 
@@ -91,17 +78,17 @@ def plot_frobenius_norms(runs, title="Frobenius Norm of Weights", save_path=None
 
     ax1.set_xlabel("Epoch")
     ax1.set_ylabel(r"$\|W^{(1)}\|_F$")
-    _set_title(ax1, r"$W^{(1)}$ Frobenius Norm")
+    ax1.set_title(r"$W^{(1)}$ Frobenius Norm")
     ax1.legend(loc="best")
     ax1.grid(True, linestyle="--", alpha=0.6)
 
     ax2.set_xlabel("Epoch")
     ax2.set_ylabel(r"$\|w^{(2)}\|_2$")
-    _set_title(ax2, r"$w^{(2)}$ L2 Norm")
+    ax2.set_title(r"$w^{(2)}$ L2 Norm")
     ax2.legend(loc="best")
     ax2.grid(True, linestyle="--", alpha=0.6)
 
-    _set_suptitle(fig, title)
+    fig.suptitle(title)
     fig.tight_layout()
     save_fig_to_file(fig, save_path)
 

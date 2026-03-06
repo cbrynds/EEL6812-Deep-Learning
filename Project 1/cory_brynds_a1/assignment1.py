@@ -21,9 +21,12 @@ class LinearTransform(object):
 
     def __init__(self, W, b):
         self.W = W
-        self.momentum_W = np.zeros_like(W)
         self.b = b
+        
+        # Initialize momentum for weight and bias to 0
+        self.momentum_W = np.zeros_like(W)
         self.momentum_b = np.zeros_like(b)
+        
     def forward(self, x):
         self.x = x
         return x @ self.W.T + self.b
@@ -37,12 +40,17 @@ class LinearTransform(object):
     ):
         batch_size = self.x.shape[0]
         grad_input = grad_output @ self.W
+        
+        # The gradient of the weight and bias and averaged over the batch size
         self.grad_W = grad_output.T @ self.x / batch_size + l2_penalty * self.W
         self.grad_b = grad_output.mean(axis=0)
+        
+        # Momentum update
         self.momentum_W = momentum * self.momentum_W - learning_rate * self.grad_W
         self.momentum_b = momentum * self.momentum_b - learning_rate * self.grad_b
         self.W += self.momentum_W
         self.b += self.momentum_b
+        
         return grad_input
 
 # This is a class for a ReLU layer max(x,0)
@@ -57,7 +65,6 @@ class ReLU(object):
         grad_output
     ):
         return grad_output * (self.x > 0)
-# ADD other operations in ReLU if needed
 
 # This is a class for a sigmoid layer followed by a cross entropy loss function, the reason 
 # this is put into a single layer is because it has a simple gradient form
@@ -104,7 +111,7 @@ class Net(object):
         
         return grad
     
-    def train(self, x_batch, y_batch, learning_rate, momentum, l2_penalty):#retain only the relevant input arguments
+    def train(self, x_batch, y_batch, learning_rate, momentum, l2_penalty):
         prediction = self.forward(x_batch)
         
         ce_loss = self.sigmoid_cross_entropy.compute_ce_loss(y_batch)
@@ -155,8 +162,8 @@ def train_model(train_x, train_y, test_x, test_y, input_dims,
             ce_loss, total_loss = nnet.train(x_batch, y_batch, learning_rate, momentum, l2_penalty)
             cumulative_ce_loss += ce_loss
             cumulative_total_loss += total_loss
-            print('\r  [{}] Epoch {:3d}, mb {:3d}  Avg.Loss = {:.4f}'.format(
-                label, epoch + 1, b + 1, cumulative_total_loss / (b + 1)), end='')
+            print('\r  [{}] Epoch {:3d},  Avg.Loss = {:.4f}'.format(
+                label, epoch + 1, cumulative_total_loss / (b + 1)), end='')
 
         train_ce_loss, train_total_loss, train_error = nnet.evaluate(train_x, train_y, l2_penalty)
         test_ce_loss, test_total_loss, test_error = nnet.evaluate(test_x, test_y, l2_penalty)
@@ -179,7 +186,6 @@ def train_model(train_x, train_y, test_x, test_y, input_dims,
 # Auxillary function added to make sweeping parameters easier
 def sweep_parameter(param_name, param_values, defaults, train_x, train_y,
                     test_x, test_y, input_dims, save_dir="results"):
-    """Sweep one hyperparameter while holding the rest at their defaults."""
     runs = []
     for val in param_values:
         config = defaults.copy()
@@ -226,9 +232,10 @@ def sweep_parameter(param_name, param_values, defaults, train_x, train_y,
 
     return runs
 
+# I kept the default training loop inside of main, followed by the function call to sweep the parameters
 if __name__ == '__main__':
-    if sys.version_info[0] < 3: # check the version of python
-        data = pickle.load(open('cifar_2class_py2.p', 'rb')) # load the data
+    if sys.version_info[0] < 3:
+        data = pickle.load(open('cifar_2class_py2.p', 'rb'))
         train_x = data['train_data']
         train_y = data['train_labels']
         test_x = data['test_data']
