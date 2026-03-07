@@ -41,21 +41,21 @@ def plot_total_loss(baseline_loss, modified_loss, num_epochs, output_dir):
     plot_metric(baseline_loss, modified_loss, num_epochs, "Total Loss vs Epoch", output_dir)
 
 
-def plot_training_accuracy(baseline_train_accuracy, modified_train_accuracy, num_epochs, output_dir):
+def plot_training_error_rate(baseline_train_error_rate, modified_train_error_rate, num_epochs, output_dir):
     plot_metric(
-        baseline_train_accuracy,
-        modified_train_accuracy,
+        baseline_train_error_rate,
+        modified_train_error_rate,
         num_epochs,
-        "Training Accuracy vs Epoch",
+        "Training Error Rate vs Epoch",
         output_dir
     )
 
 
-def plot_testing_accuracy(baseline_test_accuracy, modified_test_accuracy, num_epochs, output_dir):
+def plot_testing_error_rate(baseline_test_error_rate, modified_test_error_rate, num_epochs, output_dir):
     plot_metric(
-        baseline_test_accuracy,
-        modified_test_accuracy,
+        baseline_test_error_rate,
+        modified_test_error_rate,
         num_epochs,
-        "Testing Accuracy vs Epoch",
+        "Testing Error Rate vs Epoch",
         output_dir
     )
