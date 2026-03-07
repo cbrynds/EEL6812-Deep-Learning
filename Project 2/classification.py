@@ -5,6 +5,7 @@ import torchvision
 import torchvision.transforms as transforms
 import torch.optim as optim
 from torchvision.models import resnet18, ResNet18_Weights
+import os
 from plotting_utils import (
     plot_total_loss,
     plot_training_error_rate,
@@ -256,8 +257,12 @@ if __name__ == "__main__":
     # Hyperparameters
     BATCH_SIZE = 128
     LEARNING_RATE = 0.001
-    MAX_EPOCH = 30
+    MAX_EPOCH = 50
+    plot_dir = "./plots"
     
+    if not os.path.exists(plot_dir):
+        os.makedirs(plot_dir)
+
     # Load data
     transform = transforms.Compose(
         [transforms.ToTensor(),
@@ -290,36 +295,36 @@ if __name__ == "__main__":
 
     print("Training model with batch normalization layer (task 1)...")
     add_batch_normalization_total_loss, add_batch_normalization_training_error_rate, add_batch_normalization_testing_error_rate = train_and_evaluate_model(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, trainloader, testloader, device, add_batch_normalization=True)
-    plot_total_loss(baseline_total_loss, add_batch_normalization_total_loss, MAX_EPOCH, "add_batch_normalization")
-    plot_training_error_rate(baseline_training_accuracy, add_batch_normalization_training_error_rate, MAX_EPOCH, "add_batch_normalization")
-    plot_testing_error_rate(baseline_testing_accuracy, add_batch_normalization_testing_error_rate, MAX_EPOCH, "add_batch_normalization")
+    plot_total_loss(baseline_total_loss, add_batch_normalization_total_loss, MAX_EPOCH, f"{plot_dir}/add_batch_normalization")
+    plot_training_error_rate(baseline_training_accuracy, add_batch_normalization_training_error_rate, MAX_EPOCH, f"{plot_dir}/add_batch_normalization")
+    plot_testing_error_rate(baseline_testing_accuracy, add_batch_normalization_testing_error_rate, MAX_EPOCH, f"{plot_dir}/add_batch_normalization")
 
     print("Training model with additional fully connected layer (task 2)...")
     add_fc_layer_total_loss, add_fc_layer_training_error_rate, add_fc_layer_testing_error_rate = train_and_evaluate_model(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, trainloader, testloader, device, add_fc_layer=True)
-    plot_total_loss(baseline_total_loss, add_fc_layer_total_loss, MAX_EPOCH, "add_fc_layer")
-    plot_training_error_rate(baseline_training_accuracy, add_fc_layer_training_error_rate, MAX_EPOCH, "add_fc_layer")
-    plot_testing_error_rate(baseline_testing_accuracy, add_fc_layer_testing_error_rate, MAX_EPOCH, "add_fc_layer")
+    plot_total_loss(baseline_total_loss, add_fc_layer_total_loss, MAX_EPOCH, f"{plot_dir}/add_fc_layer")
+    plot_training_error_rate(baseline_training_accuracy, add_fc_layer_training_error_rate, MAX_EPOCH, f"{plot_dir}/add_fc_layer")
+    plot_testing_error_rate(baseline_testing_accuracy, add_fc_layer_testing_error_rate, MAX_EPOCH, f"{plot_dir}/add_fc_layer")
 
     print("Training model with reduced hidden nodes in additional fc layer (task 3)...")
     reduce_hidden_nodes_total_loss, reduce_hidden_nodes_training_error_rate, reduce_hidden_nodes_testing_error_rate = train_and_evaluate_model(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, trainloader, testloader, device, add_fc_layer=True, reduce_hidden_nodes=True)
-    plot_total_loss(baseline_total_loss, reduce_hidden_nodes_total_loss, MAX_EPOCH, "reduce_hidden_nodes")
-    plot_training_error_rate(baseline_training_accuracy, reduce_hidden_nodes_training_error_rate, MAX_EPOCH, "reduce_hidden_nodes")
-    plot_testing_error_rate(baseline_testing_accuracy, reduce_hidden_nodes_testing_error_rate, MAX_EPOCH, "reduce_hidden_nodes")
+    plot_total_loss(baseline_total_loss, reduce_hidden_nodes_total_loss, MAX_EPOCH, f"{plot_dir}/reduce_hidden_nodes")
+    plot_training_error_rate(baseline_training_accuracy, reduce_hidden_nodes_training_error_rate, MAX_EPOCH, f"{plot_dir}/reduce_hidden_nodes")
+    plot_testing_error_rate(baseline_testing_accuracy, reduce_hidden_nodes_testing_error_rate, MAX_EPOCH, f"{plot_dir}/reduce_hidden_nodes")
 
     print("Training model with halved number of filters in convolutional layers (task 4)...")
     halve_num_filters_total_loss, halve_num_filters_training_error_rate, halve_num_filters_testing_error_rate = train_and_evaluate_model(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, trainloader, testloader, device, add_fc_layer=True, halve_num_filters=True)
-    plot_total_loss(baseline_total_loss, halve_num_filters_total_loss, MAX_EPOCH, "halve_num_filters")
-    plot_training_error_rate(baseline_training_accuracy, halve_num_filters_training_error_rate, MAX_EPOCH, "halve_num_filters")
-    plot_testing_error_rate(baseline_testing_accuracy, halve_num_filters_testing_error_rate, MAX_EPOCH, "halve_num_filters")
+    plot_total_loss(baseline_total_loss, halve_num_filters_total_loss, MAX_EPOCH, f"{plot_dir}/halve_num_filters")
+    plot_training_error_rate(baseline_training_accuracy, halve_num_filters_training_error_rate, MAX_EPOCH, f"{plot_dir}/halve_num_filters")
+    plot_testing_error_rate(baseline_testing_accuracy, halve_num_filters_testing_error_rate, MAX_EPOCH, f"{plot_dir}/halve_num_filters")
 
     print("Training model with mean pooling instead of max pooling (task 5)...")
     use_mean_pooling_total_loss, use_mean_pooling_training_error_rate, use_mean_pooling_testing_error_rate  = train_and_evaluate_model(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, trainloader, testloader, device, add_fc_layer=True, use_mean_pooling=True)
-    plot_total_loss(baseline_total_loss, use_mean_pooling_total_loss, MAX_EPOCH, "use_mean_pooling")
-    plot_training_error_rate(baseline_training_accuracy, use_mean_pooling_training_error_rate, MAX_EPOCH, "use_mean_pooling")
-    plot_testing_error_rate(baseline_testing_accuracy, use_mean_pooling_testing_error_rate, MAX_EPOCH, "use_mean_pooling")
+    plot_total_loss(baseline_total_loss, use_mean_pooling_total_loss, MAX_EPOCH, f"{plot_dir}/use_mean_pooling")
+    plot_training_error_rate(baseline_training_accuracy, use_mean_pooling_training_error_rate, MAX_EPOCH, f"{plot_dir}/use_mean_pooling")
+    plot_testing_error_rate(baseline_testing_accuracy, use_mean_pooling_testing_error_rate, MAX_EPOCH, f"{plot_dir}/use_mean_pooling")
 
     print("Training model with dropout layer (task 6)...")
     add_dropout_layer_total_loss, add_dropout_layer_training_error_rate, add_dropout_layer_testing_error_rate = train_and_evaluate_model(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, trainloader, testloader, device, add_fc_layer=True, add_dropout_layer=True)
-    plot_total_loss(baseline_total_loss, add_dropout_layer_total_loss, MAX_EPOCH, "add_dropout_layer")
-    plot_training_error_rate(baseline_training_accuracy, add_dropout_layer_training_error_rate, MAX_EPOCH, "add_dropout_layer")
-    plot_testing_error_rate(baseline_testing_accuracy, add_dropout_layer_testing_error_rate, MAX_EPOCH, "add_dropout_layer")
+    plot_total_loss(baseline_total_loss, add_dropout_layer_total_loss, MAX_EPOCH, f"{plot_dir}/add_dropout_layer")
+    plot_training_error_rate(baseline_training_accuracy, add_dropout_layer_training_error_rate, MAX_EPOCH, f"{plot_dir}/add_dropout_layer")
+    plot_testing_error_rate(baseline_testing_accuracy, add_dropout_layer_testing_error_rate, MAX_EPOCH, f"{plot_dir}/add_dropout_layer")

@@ -14,7 +14,7 @@ def validate_inputs(baseline_values, modified_values, num_epochs):
         )
 
 
-def plot_metric(baseline_values, modified_values, num_epochs, title, output_dir):
+def plot_metric(baseline_values, modified_values, num_epochs, title, y_metric, output_dir):
     validate_inputs(baseline_values, modified_values, num_epochs)
 
     epochs = list(range(1, num_epochs + 1))
@@ -25,7 +25,7 @@ def plot_metric(baseline_values, modified_values, num_epochs, title, output_dir)
     plt.plot(epochs, modified_values, marker="o", label="Modified")
 
     plt.xlabel("Epoch")
-    plt.ylabel("Loss / Error Rate")
+    plt.ylabel(y_metric)
     # plt.title(title)
     plt.grid(True, alpha=0.3)
     plt.legend()
@@ -38,7 +38,7 @@ def plot_metric(baseline_values, modified_values, num_epochs, title, output_dir)
 
 
 def plot_total_loss(baseline_loss, modified_loss, num_epochs, output_dir):
-    plot_metric(baseline_loss, modified_loss, num_epochs, "Total Loss vs Epoch", output_dir)
+    plot_metric(baseline_loss, modified_loss, num_epochs, "Total Loss vs Epoch", "Loss", output_dir)
 
 
 def plot_training_error_rate(baseline_train_error_rate, modified_train_error_rate, num_epochs, output_dir):
@@ -47,6 +47,7 @@ def plot_training_error_rate(baseline_train_error_rate, modified_train_error_rat
         modified_train_error_rate,
         num_epochs,
         "Training Error Rate vs Epoch",
+        "Error Rate",
         output_dir
     )
 
@@ -57,5 +58,6 @@ def plot_testing_error_rate(baseline_test_error_rate, modified_test_error_rate, 
         modified_test_error_rate,
         num_epochs,
         "Testing Error Rate vs Epoch",
+        "Error Rate",
         output_dir
     )
