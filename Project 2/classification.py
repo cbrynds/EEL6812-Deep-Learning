@@ -170,94 +170,104 @@ def train_and_evaluate_model(
     print('Finished Training')
     return total_loss_list, training_error_rate_list, testing_error_rate_list
 
-# def train_and_evaluate_resnet18(batch_size, learning_rate, max_epochs, 
-#     trainloader, testloader, device):
+def train_and_evaluate_resnet18(batch_size, learning_rate, max_epochs, device, finetune_last_fc=False):
+
+    weights = ResNet18_Weights.DEFAULT
     
-#     # resize CIFAR-10 images to be compatible with ResNet18
-#     train_transform = transforms.Compose([
-#         transforms.Resize((224, 224)), 
-#         transforms.ToTensor(),
-#         transforms.Normalize(mean=weights.transforms().mean,
-#                             std=weights.transforms().std),
-#     ])
+    # resize CIFAR-10 images to be compatible with ResNet18. Inputs are normalized according to pre-trained weights
+    train_transform = transforms.Compose([
+        transforms.Resize((224, 224)), 
+        transforms.ToTensor(),
+        transforms.Normalize(mean=weights.transforms().mean, std=weights.transforms().std),
+    ])
 
-#     test_transform = transforms.Compose([
-#         transforms.Resize((224, 224)),
-#         transforms.ToTensor(),
-#         transforms.Normalize(mean=weights.transforms().mean,
-#                             std=weights.transforms().std),
-#     ])
+    test_transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=weights.transforms().mean,std=weights.transforms().std),
+    ])
 
-#     trainset = torchvision.datasets.CIFAR10(root="./data", train=True, download=True, transform=train_transform)
-#     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
-#     testset  = torchvision.datasets.CIFAR10(root="./data", train=False, download=True, transform=test_transform)
-#     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2)
+    trainset = torchvision.datasets.CIFAR10(root="./data", train=True, download=True, transform=train_transform)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
+    testset  = torchvision.datasets.CIFAR10(root="./data", train=False, download=True, transform=test_transform)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2)
 
-#     print('Building model...')
+    print('Building model...')
 
-#     # Initialize model, loss function, and optimizer
-#     weights = ResNet18_Weights.DEFAULT
-#     model = resnet18(weights=weights)
+    # Initialize model, loss function, and optimizer
+    model = resnet18(weights=weights)
 
-#     # Adjust output layer for CIFAR-10's classes
-#     model.fc = nn.Linear(model.fc.in_features, 10)
-#     criterion = nn.CrossEntropyLoss()
-#     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    # Adjust output layer for CIFAR-10's classes
+    model.fc = nn.Linear(model.fc.in_features, 10)
+    model = model.to(device)
+    criterion = nn.CrossEntropyLoss()
 
-#     # Lists for baseline vs modified comparisons.
-#     total_loss_list = []
-#     training_error_rate_list = []
-#     testing_error_rate_list = []
+    if finetune_last_fc:
+        for param in model.parameters():
+            param.requires_grad = False
+        for param in model.fc.parameters():
+            param.requires_grad = True
+        optimizer = optim.Adam(model.fc.parameters(), lr=learning_rate)
+    else:
+        for param in model.parameters():
+            param.requires_grad = True
+        optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-#     print('Start training...')
-#     for epoch in range(max_epochs):
-#         model.train()
-#         running_loss = 0.0
-#         epoch_loss_sum = 0.0
-#         epoch_sample_count = 0
-#         for i, data in enumerate(trainloader, 0):
-#             # Forward pass
-#             inputs, labels = data
-#             inputs, labels = inputs.to(device), labels.to(device)
-#             outputs = model(inputs)
-#             loss = criterion(outputs, labels)
+    # Lists for baseline vs modified comparisons.
+    total_loss_list = []
+    training_error_rate_list = []
+    testing_error_rate_list = []
+
+    print('Start training...')
+    for epoch in range(max_epochs):
+        model.train()
+        running_loss = 0.0
+        epoch_loss_sum = 0.0
+        epoch_sample_count = 0
+        for i, data in enumerate(trainloader, 0):
+            # Forward pass
+            inputs, labels = data
+            inputs, labels = inputs.to(device), labels.to(device)
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
             
-#             # Backward pass and optimization
-#             optimizer.zero_grad()
-#             loss.backward() # Backpropagation
-#             optimizer.step() # mini batch gradient descent-based updates
+            # Backward pass and optimization
+            optimizer.zero_grad()
+            loss.backward() # Backpropagation
+            optimizer.step() # mini batch gradient descent-based updates
             
-#             running_loss += loss.item()
-#             batch_size = labels.size(0)
-#             epoch_loss_sum += loss.item() * batch_size
-#             epoch_sample_count += batch_size
+            running_loss += loss.item()
+            batch_size = labels.size(0)
+            epoch_loss_sum += loss.item() * batch_size
+            epoch_sample_count += batch_size
 
-#             # Print statistics
-#             if i % 100 == 99:    # print every 100 mini-batches
-#                 print(f'Epoch [{epoch+1}/{max_epochs}], Step [{i+1}/{len(trainloader)}], Loss: {running_loss/100:.4f}')
-#                 running_loss = 0.0
+            # Print statistics
+            if i % 100 == 99:    # print every 100 mini-batches
+                print(f'Epoch [{epoch+1}/{max_epochs}], Step [{i+1}/{len(trainloader)}], Loss: {running_loss/100:.4f}')
+                running_loss = 0.0
 
-#         print(f'Finish training Epoch {epoch+1}, start evaluating...')
-#         train_loss, train_accuracy = eval_net(resnet18, trainloader, criterion, device)
-#         test_loss, test_accuracy = eval_net(resnet18, testloader, criterion, device)
-#         epoch_total_loss = epoch_loss_sum / epoch_sample_count if epoch_sample_count > 0 else 0.0
+        print(f'Finish training Epoch {epoch+1}, start evaluating...')
+        train_loss, train_accuracy = eval_net(model, trainloader, criterion, device)
+        test_loss, test_accuracy = eval_net(model, testloader, criterion, device)
+        
+        epoch_total_loss = epoch_loss_sum / epoch_sample_count
 
-#         total_loss_list.append(epoch_total_loss)
-#         training_error_rate_list.append(train_accuracy)
-#         testing_error_rate_list.append(test_accuracy)
+        total_loss_list.append(epoch_total_loss)
+        training_error_rate_list.append(train_accuracy)
+        testing_error_rate_list.append(test_accuracy)
 
-#         print('Epoch: %d total_loss: %.5f train_loss: %.5f train_error_rate: %.5f test_loss: %.5f test_error_rate: %.5f' %
-#               (epoch+1, epoch_total_loss, train_loss, train_accuracy, test_loss, test_accuracy))
+        print('Epoch: %d total_loss: %.5f train_loss: %.5f train_error_rate: %.5f test_loss: %.5f test_error_rate: %.5f' %
+              (epoch+1, epoch_total_loss, train_loss, train_accuracy, test_loss, test_accuracy))
 
-#     print('Finished Training')
-#     return total_loss_list, training_error_rate_list, testing_error_rate_list
+    print('Finished Training')
+    return total_loss_list, training_error_rate_list, testing_error_rate_list
 
     
 if __name__ == "__main__":
     # Hyperparameters
     BATCH_SIZE = 128
     LEARNING_RATE = 0.001
-    MAX_EPOCH = 50
+    MAX_EPOCH = 30
     plot_dir = "./plots"
     
     if not os.path.exists(plot_dir):
@@ -290,41 +300,49 @@ if __name__ == "__main__":
     )
     print(f'Using device: {device}')
     
-    print("Training baseline model...")
-    baseline_total_loss, baseline_training_accuracy, baseline_testing_accuracy = train_and_evaluate_model(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, trainloader, testloader, device)
+    # Model ablation studies
+    # print("Training baseline model...")
+    # baseline_total_loss, baseline_training_accuracy, baseline_testing_accuracy = train_and_evaluate_model(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, trainloader, testloader, device)
 
-    print("Training model with batch normalization layer (task 1)...")
-    add_batch_normalization_total_loss, add_batch_normalization_training_error_rate, add_batch_normalization_testing_error_rate = train_and_evaluate_model(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, trainloader, testloader, device, add_batch_normalization=True)
-    plot_total_loss(baseline_total_loss, add_batch_normalization_total_loss, MAX_EPOCH, f"{plot_dir}/add_batch_normalization")
-    plot_training_error_rate(baseline_training_accuracy, add_batch_normalization_training_error_rate, MAX_EPOCH, f"{plot_dir}/add_batch_normalization")
-    plot_testing_error_rate(baseline_testing_accuracy, add_batch_normalization_testing_error_rate, MAX_EPOCH, f"{plot_dir}/add_batch_normalization")
+    # print("Training model with batch normalization layer (task 1)...")
+    # add_batch_normalization_total_loss, add_batch_normalization_training_error_rate, add_batch_normalization_testing_error_rate = train_and_evaluate_model(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, trainloader, testloader, device, add_batch_normalization=True)
+    # plot_total_loss(baseline_total_loss, add_batch_normalization_total_loss, MAX_EPOCH, f"{plot_dir}/add_batch_normalization")
+    # plot_training_error_rate(baseline_training_accuracy, add_batch_normalization_training_error_rate, MAX_EPOCH, f"{plot_dir}/add_batch_normalization")
+    # plot_testing_error_rate(baseline_testing_accuracy, add_batch_normalization_testing_error_rate, MAX_EPOCH, f"{plot_dir}/add_batch_normalization")
 
-    print("Training model with additional fully connected layer (task 2)...")
-    add_fc_layer_total_loss, add_fc_layer_training_error_rate, add_fc_layer_testing_error_rate = train_and_evaluate_model(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, trainloader, testloader, device, add_fc_layer=True)
-    plot_total_loss(baseline_total_loss, add_fc_layer_total_loss, MAX_EPOCH, f"{plot_dir}/add_fc_layer")
-    plot_training_error_rate(baseline_training_accuracy, add_fc_layer_training_error_rate, MAX_EPOCH, f"{plot_dir}/add_fc_layer")
-    plot_testing_error_rate(baseline_testing_accuracy, add_fc_layer_testing_error_rate, MAX_EPOCH, f"{plot_dir}/add_fc_layer")
+    # print("Training model with additional fully connected layer (task 2)...")
+    # add_fc_layer_total_loss, add_fc_layer_training_error_rate, add_fc_layer_testing_error_rate = train_and_evaluate_model(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, trainloader, testloader, device, add_fc_layer=True)
+    # plot_total_loss(baseline_total_loss, add_fc_layer_total_loss, MAX_EPOCH, f"{plot_dir}/add_fc_layer")
+    # plot_training_error_rate(baseline_training_accuracy, add_fc_layer_training_error_rate, MAX_EPOCH, f"{plot_dir}/add_fc_layer")
+    # plot_testing_error_rate(baseline_testing_accuracy, add_fc_layer_testing_error_rate, MAX_EPOCH, f"{plot_dir}/add_fc_layer")
 
-    print("Training model with reduced hidden nodes in additional fc layer (task 3)...")
-    reduce_hidden_nodes_total_loss, reduce_hidden_nodes_training_error_rate, reduce_hidden_nodes_testing_error_rate = train_and_evaluate_model(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, trainloader, testloader, device, add_fc_layer=True, reduce_hidden_nodes=True)
-    plot_total_loss(baseline_total_loss, reduce_hidden_nodes_total_loss, MAX_EPOCH, f"{plot_dir}/reduce_hidden_nodes")
-    plot_training_error_rate(baseline_training_accuracy, reduce_hidden_nodes_training_error_rate, MAX_EPOCH, f"{plot_dir}/reduce_hidden_nodes")
-    plot_testing_error_rate(baseline_testing_accuracy, reduce_hidden_nodes_testing_error_rate, MAX_EPOCH, f"{plot_dir}/reduce_hidden_nodes")
+    # print("Training model with reduced hidden nodes in additional fc layer (task 3)...")
+    # reduce_hidden_nodes_total_loss, reduce_hidden_nodes_training_error_rate, reduce_hidden_nodes_testing_error_rate = train_and_evaluate_model(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, trainloader, testloader, device, add_fc_layer=True, reduce_hidden_nodes=True)
+    # plot_total_loss(baseline_total_loss, reduce_hidden_nodes_total_loss, MAX_EPOCH, f"{plot_dir}/reduce_hidden_nodes")
+    # plot_training_error_rate(baseline_training_accuracy, reduce_hidden_nodes_training_error_rate, MAX_EPOCH, f"{plot_dir}/reduce_hidden_nodes")
+    # plot_testing_error_rate(baseline_testing_accuracy, reduce_hidden_nodes_testing_error_rate, MAX_EPOCH, f"{plot_dir}/reduce_hidden_nodes")
 
-    print("Training model with halved number of filters in convolutional layers (task 4)...")
-    halve_num_filters_total_loss, halve_num_filters_training_error_rate, halve_num_filters_testing_error_rate = train_and_evaluate_model(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, trainloader, testloader, device, add_fc_layer=True, halve_num_filters=True)
-    plot_total_loss(baseline_total_loss, halve_num_filters_total_loss, MAX_EPOCH, f"{plot_dir}/halve_num_filters")
-    plot_training_error_rate(baseline_training_accuracy, halve_num_filters_training_error_rate, MAX_EPOCH, f"{plot_dir}/halve_num_filters")
-    plot_testing_error_rate(baseline_testing_accuracy, halve_num_filters_testing_error_rate, MAX_EPOCH, f"{plot_dir}/halve_num_filters")
+    # print("Training model with halved number of filters in convolutional layers (task 4)...")
+    # halve_num_filters_total_loss, halve_num_filters_training_error_rate, halve_num_filters_testing_error_rate = train_and_evaluate_model(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, trainloader, testloader, device, add_fc_layer=True, halve_num_filters=True)
+    # plot_total_loss(baseline_total_loss, halve_num_filters_total_loss, MAX_EPOCH, f"{plot_dir}/halve_num_filters")
+    # plot_training_error_rate(baseline_training_accuracy, halve_num_filters_training_error_rate, MAX_EPOCH, f"{plot_dir}/halve_num_filters")
+    # plot_testing_error_rate(baseline_testing_accuracy, halve_num_filters_testing_error_rate, MAX_EPOCH, f"{plot_dir}/halve_num_filters")
 
-    print("Training model with mean pooling instead of max pooling (task 5)...")
-    use_mean_pooling_total_loss, use_mean_pooling_training_error_rate, use_mean_pooling_testing_error_rate  = train_and_evaluate_model(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, trainloader, testloader, device, add_fc_layer=True, use_mean_pooling=True)
-    plot_total_loss(baseline_total_loss, use_mean_pooling_total_loss, MAX_EPOCH, f"{plot_dir}/use_mean_pooling")
-    plot_training_error_rate(baseline_training_accuracy, use_mean_pooling_training_error_rate, MAX_EPOCH, f"{plot_dir}/use_mean_pooling")
-    plot_testing_error_rate(baseline_testing_accuracy, use_mean_pooling_testing_error_rate, MAX_EPOCH, f"{plot_dir}/use_mean_pooling")
+    # print("Training model with mean pooling instead of max pooling (task 5)...")
+    # use_mean_pooling_total_loss, use_mean_pooling_training_error_rate, use_mean_pooling_testing_error_rate  = train_and_evaluate_model(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, trainloader, testloader, device, add_fc_layer=True, use_mean_pooling=True)
+    # plot_total_loss(baseline_total_loss, use_mean_pooling_total_loss, MAX_EPOCH, f"{plot_dir}/use_mean_pooling")
+    # plot_training_error_rate(baseline_training_accuracy, use_mean_pooling_training_error_rate, MAX_EPOCH, f"{plot_dir}/use_mean_pooling")
+    # plot_testing_error_rate(baseline_testing_accuracy, use_mean_pooling_testing_error_rate, MAX_EPOCH, f"{plot_dir}/use_mean_pooling")
 
-    print("Training model with dropout layer (task 6)...")
-    add_dropout_layer_total_loss, add_dropout_layer_training_error_rate, add_dropout_layer_testing_error_rate = train_and_evaluate_model(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, trainloader, testloader, device, add_fc_layer=True, add_dropout_layer=True)
-    plot_total_loss(baseline_total_loss, add_dropout_layer_total_loss, MAX_EPOCH, f"{plot_dir}/add_dropout_layer")
-    plot_training_error_rate(baseline_training_accuracy, add_dropout_layer_training_error_rate, MAX_EPOCH, f"{plot_dir}/add_dropout_layer")
-    plot_testing_error_rate(baseline_testing_accuracy, add_dropout_layer_testing_error_rate, MAX_EPOCH, f"{plot_dir}/add_dropout_layer")
+    # print("Training model with dropout layer (task 6)...")
+    # add_dropout_layer_total_loss, add_dropout_layer_training_error_rate, add_dropout_layer_testing_error_rate = train_and_evaluate_model(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, trainloader, testloader, device, add_fc_layer=True, add_dropout_layer=True)
+    # plot_total_loss(baseline_total_loss, add_dropout_layer_total_loss, MAX_EPOCH, f"{plot_dir}/add_dropout_layer")
+    # plot_training_error_rate(baseline_training_accuracy, add_dropout_layer_training_error_rate, MAX_EPOCH, f"{plot_dir}/add_dropout_layer")
+    # plot_testing_error_rate(baseline_testing_accuracy, add_dropout_layer_testing_error_rate, MAX_EPOCH, f"{plot_dir}/add_dropout_layer")
+    
+    # Pre-trained Resnet18 model
+    resnet18_total_loss_baseline, resnet18_training_error_rate_baseline, resnet18_testing_error_rate_baseline = train_and_evaluate_resnet18(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, device)
+    resnet18_total_loss_fc_finetuned, resnet18_training_error_rate_fc_finetuned, resnet18_testing_error_rate_fc_finetuned = train_and_evaluate_resnet18(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, device, finetune_last_fc=True)
+    plot_total_loss(resnet18_total_loss_baseline, resnet18_total_loss_fc_finetuned, MAX_EPOCH, f"{plot_dir}/resnet18")
+    plot_training_error_rate(resnet18_training_error_rate_baseline, resnet18_training_error_rate_fc_finetuned, MAX_EPOCH, f"{plot_dir}/resnet18")
+    plot_testing_error_rate(resnet18_testing_error_rate_baseline, resnet18_testing_error_rate_fc_finetuned, MAX_EPOCH, f"{plot_dir}/resnet18")
