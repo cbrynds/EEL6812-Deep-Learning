@@ -346,8 +346,8 @@ if __name__ == "__main__":
     plot_testing_error_rate(baseline_testing_accuracy, add_dropout_layer_testing_error_rate, MAX_EPOCH, f"{plot_dir}/add_dropout_layer")
     
     # Pre-trained Resnet18 model
-    # resnet18_total_loss_baseline, resnet18_training_error_rate_baseline, resnet18_testing_error_rate_baseline = train_and_evaluate_resnet18(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, device)
-    # resnet18_total_loss_fc_finetuned, resnet18_training_error_rate_fc_finetuned, resnet18_testing_error_rate_fc_finetuned = train_and_evaluate_resnet18(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, device, finetune_last_fc=True)
-    # plot_total_loss(resnet18_total_loss_baseline, resnet18_total_loss_fc_finetuned, MAX_EPOCH, f"{plot_dir}/resnet18")
-    # plot_training_error_rate(resnet18_training_error_rate_baseline, resnet18_training_error_rate_fc_finetuned, MAX_EPOCH, f"{plot_dir}/resnet18")
-    # plot_testing_error_rate(resnet18_testing_error_rate_baseline, resnet18_testing_error_rate_fc_finetuned, MAX_EPOCH, f"{plot_dir}/resnet18")
+    resnet18_total_loss_baseline, resnet18_training_error_rate_baseline, resnet18_testing_error_rate_baseline = train_and_evaluate_resnet18(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, device)
+    resnet18_total_loss_fc_finetuned, resnet18_training_error_rate_fc_finetuned, resnet18_testing_error_rate_fc_finetuned = train_and_evaluate_resnet18(BATCH_SIZE, LEARNING_RATE, MAX_EPOCH, device, finetune_last_fc=True)
+    plot_total_loss(resnet18_total_loss_baseline, resnet18_total_loss_fc_finetuned, MAX_EPOCH, f"{plot_dir}/resnet18")
+    plot_training_error_rate(resnet18_training_error_rate_baseline, resnet18_training_error_rate_fc_finetuned, MAX_EPOCH, f"{plot_dir}/resnet18")
+    plot_testing_error_rate(resnet18_testing_error_rate_baseline, resnet18_testing_error_rate_fc_finetuned, MAX_EPOCH, f"{plot_dir}/resnet18")
