@@ -10,13 +10,17 @@ import matplotlib.pyplot as plt
 import torchinfo
 import torch
 from torchvision import transforms
+from plotting_utils import plot_detections_vs_conf, plot_detections_vs_iou
 
 COCO_DIR = "coco_val_30_with_gt"
 COCO_IMAGES_PATH = f"{COCO_DIR}/images"
 TEST_IMAGE_PATH = f"{COCO_DIR}/test_image_assignment_2.JPEG"
 
-### TASK 1 ###
+def print_task(idx):
+    print(f"###### TASK {idx} ######")
 
+### TASK 1 ###
+print_task(1)
 # Load model (downloads weights on first run)
 model = YOLO('yolov8n.pt')
 
@@ -25,36 +29,38 @@ pt_model = model.model
 
 print(torchinfo.summary(pt_model))
 
-## TASK 2 ###
-# def preprocess_image(img, tensor_height, tensor_width):
-#     preprocess = transforms.Compose([
-#         transforms.Resize((tensor_height, tensor_width)),
-#         transforms.ToTensor(),
-#     ])
+### TASK 2 ###
+print_task(2)
+def preprocess_image(img, tensor_height, tensor_width):
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    preprocess = transforms.Compose([
+        transforms.ToPILImage(),
+        transforms.Resize((tensor_height, tensor_width)),
+        transforms.ToTensor(),
+    ])
     
-#     img_tensor = preprocess(img).unsqueeze(0)  # Add batch dimension
-#     return img_tensor
+    img_tensor = preprocess(img).unsqueeze(0)  # Add batch dimension
+    return img_tensor
 
-# #Load images from the MS COCO folder
-# # Raw predictions from YOLO model. Make sure the img_tensor is formatted accordingly
-# img_path = f"{COCO_IMAGES_PATH}/000000023272.jpg"
+#Load images from the MS COCO folder
+# Raw predictions from YOLO model. Make sure the img_tensor is formatted accordingly
+img_path = f"{COCO_IMAGES_PATH}/000000023272.jpg"
 
-# img = cv2.imread(img_path)
-# if img is None:
-#     raise ValueError(f"Warning: Could not read image {img_path}. Skipping.")
+img = cv2.imread(img_path)
+if img is None:
+    raise ValueError(f"Warning: Could not read image {img_path}. Skipping.")
 
-# img_tensor = preprocess_image(img, 640, 640)
-# print(img_tensor.shape)
+img_tensor = preprocess_image(img, 640, 640)
+print(img_tensor.shape)
 
-# raw = model.model(img_tensor)
+raw = model.model(img_tensor)
 
-# if isinstance(raw, (list, tuple)):
-#     for i, t in enumerate(raw):
-#         print(i, type(t), getattr(t, "shape", None))
-# else:
-#     print(type(raw), raw.shape)
-    
-### TASK 3 ###
+if isinstance(raw, (list, tuple)):
+    for i, t in enumerate(raw):
+        print(i, type(t), getattr(t, "shape", None))
+else:
+    print(type(raw), raw.shape)
     
 def run_inference(model, img, conf=0.25, iou=0.45, verbose=False):
     # Run inference
@@ -62,16 +68,16 @@ def run_inference(model, img, conf=0.25, iou=0.45, verbose=False):
 
     r = results[0]
     names = model.names  # class id -> name
-    print(names)
-    print(r.boxes)
+    # print(names)
+    # print(r.boxes)
 
     # Extract detections
     # r.boxes.xyxy: (N,4), r.boxes.conf: (N,), r.boxes.cls: (N,)
     xyxy = r.boxes.xyxy.cpu().numpy() if r.boxes is not None else np.zeros((0, 4))
     scores = r.boxes.conf.cpu().numpy() if r.boxes is not None else np.zeros((0,))
     cls_ids = r.boxes.cls.cpu().numpy().astype(int) if r.boxes is not None else np.zeros((0,), dtype=int)
-    print(scores)
-    print(cls_ids)
+    # print(scores)
+    # print(cls_ids)
     
     return names, scores, cls_ids
 
@@ -128,7 +134,7 @@ def predict_bounding_boxes(image_files_sel, conf=0.25, iou=0.45, verbose=False):
         os.makedirs(output_dir)
 
     for img_path in image_files_sel:
-        print(f"Processing image: {img_path}")
+        # print(f"Processing image: {img_path}")
 
         # Load image (BGR)
         img = cv2.imread(img_path)
@@ -147,104 +153,6 @@ def predict_bounding_boxes(image_files_sel, conf=0.25, iou=0.45, verbose=False):
 
     return num_detections
 
-def _image_label_from_path(img_path):
-    # Use image id (filename without extension) instead of full path in legend.
-    return os.path.splitext(os.path.basename(img_path))[0]
-
-def _linestyle_for_index(idx):
-    linestyles = ["-", "--", "-.", ":"]
-    return linestyles[idx % len(linestyles)]
-
-PLOT_TITLE_FONTSIZE = 18
-PLOT_LABEL_FONTSIZE = 15
-PLOT_TICK_FONTSIZE = 13
-PLOT_LEGEND_FONTSIZE = 11
-PLOT_LEGEND_TITLE_FONTSIZE = 12
-
-def plot_detections_vs_conf(num_detections_conf, fixed_iou, save_dir):
-    conf_values = sorted(num_detections_conf.keys())
-    if len(conf_values) == 0:
-        return
-
-    image_paths = sorted(num_detections_conf[conf_values[0]].keys())
-    cmap = plt.cm.get_cmap("tab20", max(1, len(image_paths)))
-
-    fig, ax = plt.subplots(figsize=(12, 8))
-    for idx, img_path in enumerate(image_paths):
-        y = [num_detections_conf[conf].get(img_path, 0) for conf in conf_values]
-        ax.plot(
-            conf_values,
-            y,
-            label=_image_label_from_path(img_path),
-            color=cmap(idx),
-            linestyle=_linestyle_for_index(idx),
-            linewidth=2,
-        )
-
-    ax.set_xlabel("Confidence Threshold", fontsize=PLOT_LABEL_FONTSIZE)
-    ax.set_ylabel("Number of Detections", fontsize=PLOT_LABEL_FONTSIZE)
-    # ax.set_title(f"Detections vs Confidence (fixed IoU={fixed_iou})", fontsize=PLOT_TITLE_FONTSIZE)
-    ax.tick_params(axis="both", labelsize=PLOT_TICK_FONTSIZE)
-    ax.grid(True, alpha=0.3)
-    # ax.legend(
-    #     title="Image ID",
-    #     ncol=2,
-    #     fontsize=PLOT_LEGEND_FONTSIZE,
-    #     title_fontsize=PLOT_LEGEND_TITLE_FONTSIZE,
-    #     loc="center left",
-    #     bbox_to_anchor=(1.02, 0.5),
-    #     borderaxespad=0.0,
-    # )
-    fig.tight_layout(rect=[0, 0, 0.8, 1])
-    fig.savefig(
-        os.path.join(save_dir, f"detections_vs_conf_iou_{fixed_iou}.png"),
-        dpi=200,
-        bbox_inches="tight",
-    )
-    plt.close(fig)
-
-def plot_detections_vs_iou(num_detections_iou, fixed_conf, save_dir):
-    iou_values = sorted(num_detections_iou.keys())
-    if len(iou_values) == 0:
-        return
-
-    image_paths = sorted(num_detections_iou[iou_values[0]].keys())
-    cmap = plt.cm.get_cmap("tab20", max(1, len(image_paths)))
-
-    fig, ax = plt.subplots(figsize=(12, 8))
-    for idx, img_path in enumerate(image_paths):
-        y = [num_detections_iou[iou].get(img_path, 0) for iou in iou_values]
-        ax.plot(
-            iou_values,
-            y,
-            label=_image_label_from_path(img_path),
-            color=cmap(idx),
-            linestyle=_linestyle_for_index(idx),
-            linewidth=2,
-        )
-
-    ax.set_xlabel("IoU Threshold", fontsize=PLOT_LABEL_FONTSIZE)
-    ax.set_ylabel("Number of Detections", fontsize=PLOT_LABEL_FONTSIZE)
-    # ax.set_title(f"Detections vs IoU (fixed confidence={fixed_conf})", fontsize=PLOT_TITLE_FONTSIZE)
-    ax.tick_params(axis="both", labelsize=PLOT_TICK_FONTSIZE)
-    ax.grid(True, alpha=0.3)
-    # ax.legend(
-    #     # title="Image ID",
-    #     ncol=2,
-    #     fontsize=PLOT_LEGEND_FONTSIZE,
-    #     title_fontsize=PLOT_LEGEND_TITLE_FONTSIZE,
-    #     loc="center left",
-    #     bbox_to_anchor=(1.02, 0.5),
-    #     borderaxespad=0.0,
-    # )
-    fig.tight_layout(rect=[0, 0, 0.8, 1])
-    fig.savefig(
-        os.path.join(save_dir, f"detections_vs_iou_conf_{fixed_conf}.png"),
-        dpi=200,
-        bbox_inches="tight",
-    )
-    plt.close(fig)
-
 confs = [0.05,0.10,0.25,0.50,0.75]
 ious = [0.30,0.45,0.60,0.80]
 
@@ -253,15 +161,20 @@ image_files = load_image_files()
 image_files_sel = image_files[:10] # First 10 images
 
 ### TASK 3 ###
+print_task(3)
+
 iou_fixed_for_conf = 0.45
 num_detections_conf = {}
 for conf in confs:
+    print(f"Evaluating images with a confidence threshold of {conf}")
     num_detections_conf[conf] = predict_bounding_boxes(image_files_sel, conf=conf, iou=iou_fixed_for_conf)
 
 ### TASK 4 ###
+print_task(4)
 conf_fixed_for_iou = 0.25
 num_detections_iou = {}
 for iou in ious:
+    print(f"Evaluating images with an IoU threshold of {iou}")
     num_detections_iou[iou] = predict_bounding_boxes(image_files_sel, conf=conf_fixed_for_iou, iou=iou)
 
 plot_dir = "object_detection_plots"
@@ -272,6 +185,7 @@ plot_detections_vs_conf(num_detections_conf, fixed_iou=iou_fixed_for_conf, save_
 plot_detections_vs_iou(num_detections_iou, fixed_conf=conf_fixed_for_iou, save_dir=plot_dir)
 
 ### TASK 5 ###
+print_task(5)
 gt_yolo_dir = os.path.join(COCO_DIR, "labels_yolo")
 
 image_extensions = (".jpg", ".jpeg", ".png")
@@ -349,6 +263,7 @@ mAP = np.mean(aps)
 print(f"Multi-label mAP (over GT-present classes) = {mAP:.4f}")
 
 ### TASK 6 ###
+print_task(6)
 test_image = cv2.imread(TEST_IMAGE_PATH)
 if test_image is None:
     print(f"Warning: Could not read image {TEST_IMAGE_PATH}. Skipping.")
@@ -359,6 +274,7 @@ num_detections = print_bounding_box(test_image, TEST_IMAGE_PATH, results, plot_d
 print("Number of detections: ", num_detections)
 
 ### TASK 7 ###
+print_task(7)
 model = YOLO("yolo11n.pt")
 pt_model = model.model
 print(torchinfo.summary(pt_model))
