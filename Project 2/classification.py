@@ -1,12 +1,9 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.fx import symbolic_trace
-from torch.fx.passes.shape_prop import ShapeProp
 import torchvision
 import torchvision.transforms as transforms
 import torch.optim as optim
-from graphviz import Digraph
 from torchvision.models import resnet18, ResNet18_Weights
 
 import os
@@ -179,7 +176,8 @@ def train_and_evaluate_resnet18(batch_size, learning_rate, max_epochs, device, f
 
     weights = ResNet18_Weights.DEFAULT
     
-    # resize CIFAR-10 images to be compatible with ResNet18. Inputs are normalized according to pre-trained weights
+    # resize CIFAR-10 images to be compatible with ResNet18. 
+    # Inputs are normalized according to pre-trained weights
     train_transform = transforms.Compose([
         transforms.Resize((224, 224)), 
         transforms.ToTensor(),

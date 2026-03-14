@@ -223,13 +223,14 @@ def create_class_id_bit_vector(true_class_label, C):
 
 Y_true = {}
 Y_scores = {}
+# Build true and score class vectors
 for img in image_files_sel:
     _, scores, cls_ids = run_inference(model, img, conf=CONF_THRES, iou=IOU_NMS, verbose=False)
     image_id = os.path.splitext(os.path.basename(img))[0]
     
     pred_vec = np.zeros(C, dtype=float)
     for score, cls_id in zip(scores, cls_ids):
-        pred_vec[cls_id] = max(pred_vec[cls_id], score)  # Take max score for each class
+        pred_vec[cls_id] = max(pred_vec[cls_id], score)
     Y_scores[image_id] = pred_vec
 
     true_class_label = read_yolo_classes(os.path.join(gt_yolo_dir, image_id + ".txt"))
