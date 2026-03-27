@@ -27,11 +27,11 @@ def _plot_metric(model_plot_data, split, metric_index, title, y_label, filename)
         if x_values:
             plt.plot(x_values, y_values, label=label, color=color, linewidth=2)
 
-    plt.title(title)
+    # plt.title(title)
     plt.xlabel("Iteration")
     plt.ylabel(y_label)
     plt.grid(True, alpha=0.3)
-    plt.legend()
+    # plt.legend()
     plt.tight_layout()
     plt.savefig(RESULTS_DIR / filename, dpi=300, bbox_inches="tight")
     plt.close()

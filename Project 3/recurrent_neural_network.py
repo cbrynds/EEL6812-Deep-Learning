@@ -13,6 +13,8 @@ from plotting_utils import (
     plot_train_accuracy,
     plot_train_loss,
 )
+import torchinfo
+
 font = {'weight' : 'normal','size'   : 22}
 matplotlib.rc('font', **font)
 import logging
@@ -66,8 +68,8 @@ def train_model(model, train_loader, test_loader, device, epochs=50, lr=0.001):
             total += y.shape[0]
             avg_len = torch.mean(torch.tensor(l, dtype=float)).item()
             
-            iter+=1
-            plot_data['train'].append( (iter, loss.item(), (pred == y).float().mean().item()) )
+        iter+=1
+        plot_data['train'].append( (iter, loss.item(), (pred == y).float().mean().item()) )
 
         test_loss, test_acc = test_metrics(model, test_loader, device)
 
@@ -158,16 +160,25 @@ def main():
   
     model = SimpleRecurrentClassifier(recurrent_type=nn.LSTM) #nn.RNN, nn.LSTM, or nn.GRU are options
     model.to(device)
+    print("LSTM Model Summary:")
+    print(torchinfo.summary(model))
+    print(model)
 
     lstm_plot_data = train_model(model, train_loader, test_loader, device)
 
     model = SimpleRecurrentClassifier(recurrent_type=nn.RNN)
     model.to(device)
+    print("RNN Model Summary:")
+    print(torchinfo.summary(model))
+    print(model)
 
     rnn_plot_data = train_model(model, train_loader, test_loader, device)
 
     model = SimpleRecurrentClassifier(recurrent_type=nn.GRU)
     model.to(device)
+    print("GRU Model Summary:")
+    print(torchinfo.summary(model))
+    print(model)
 
     gru_plot_data = train_model(model, train_loader, test_loader, device)
 
