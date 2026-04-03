@@ -7,9 +7,11 @@ import matplotlib.pyplot as plt
 from plotting_utils import plot_attention, plot_avg_attention
 
 def encode(s):
+    global stoi
     return [stoi[c] for c in s]
 
 def decode(ids):
+    global itos
     return "".join([itos[i] for i in ids])
 
 #  Dataset for next-character prediction
@@ -125,7 +127,7 @@ class CharTransformerLM(nn.Module):
         return logits, loss
     
 @torch.no_grad()
-def evaluate(model, loader, max_batches=50):
+def evaluate(model, loader, max_batches=50, device="cpu"):
     model.eval()
     losses = []
     for i, (x, y) in enumerate(loader):
@@ -177,6 +179,7 @@ def get_attention_maps(model, text_snippet):
     return x.cpu(), attn_per_layer
 
 def main():
+    global stoi, itos
     device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
     print("Using device:", device)
 
@@ -259,7 +262,7 @@ def main():
 
             if (step + 1) % 200 == 0:
                 avg_train = running_loss / 200
-                val_loss = evaluate(model, val_loader, max_batches=20)
+                val_loss = evaluate(model, val_loader, max_batches=20, device=device)
                 print(f"Epoch {epoch+1}, Step {step+1}, Train Loss: {avg_train:.4f}, Val Loss: {val_loss:.4f}")
                 running_loss = 0.0
 
