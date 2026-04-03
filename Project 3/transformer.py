@@ -140,7 +140,7 @@ def evaluate(model, loader, max_batches=50, device="cpu"):
     return sum(losses) / len(losses)
 
 @torch.no_grad()
-def generate(model, start_text, max_new_tokens=200):
+def generate(model, start_text, block_size, max_new_tokens=200, device="cpu"):
     model.eval()
     x = torch.tensor([encode(start_text)], dtype=torch.long).to(device)
 
@@ -155,7 +155,7 @@ def generate(model, start_text, max_new_tokens=200):
     return decode(x[0].tolist())
 
 @torch.no_grad()
-def get_attention_maps(model, text_snippet):
+def get_attention_maps(model, text_snippet, block_size, device="cpu"):
     """
     Returns:
       token_ids: [1, T]
@@ -219,8 +219,10 @@ def main():
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, drop_last=True)
 
     data_item = next(iter(train_loader))
+    print(data_item[0].shape)
     print(data_item[1].shape)
 
+    exit()
     base_num_layers = 2
     ablation_num_layers = [1,2,4]
     ablation_context_length = [32, 64, 128]
@@ -270,7 +272,7 @@ def main():
     # 10. Text generation
     # =========================================================
 
-    sample = generate(model, "ROMEO:\n", max_new_tokens=300)
+    sample = generate(model, "ROMEO:\n", block_size, max_new_tokens=300, device=device)
     print(sample)
 
     # =========================================================
@@ -278,7 +280,7 @@ def main():
     # =========================================================
 
     snippet = "To be, or not to be, that is the question:"
-    x_tokens, attn_maps = get_attention_maps(model, snippet)
+    x_tokens, attn_maps = get_attention_maps(model, snippet, block_size, device=device)
 
     tokens = [itos[i] for i in x_tokens[0].tolist()]
     print("Tokens:", tokens)
