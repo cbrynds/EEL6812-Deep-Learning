@@ -9,7 +9,13 @@ MODEL_COLORS = ("tab:blue", "tab:orange", "tab:green")
 RESULTS_DIR = Path(__file__).resolve().parent / "results"
 
 
-def _series_from_plot_data(plot_data, split, metric_index):
+def _results_subdir(subdir=None):
+    output_dir = RESULTS_DIR if subdir is None else RESULTS_DIR / subdir
+    output_dir.mkdir(parents=True, exist_ok=True)
+    return output_dir
+
+
+def series_from_plot_data(plot_data, split, metric_index):
     points = plot_data.get(split, [])
     if not points:
         return [], []
@@ -19,12 +25,12 @@ def _series_from_plot_data(plot_data, split, metric_index):
     return x_values, y_values
 
 
-def _plot_metric(model_plot_data, split, metric_index, title, y_label, filename):
+def plot_metric(model_plot_data, split, metric_index, title, y_label, filename):
     RESULTS_DIR.mkdir(exist_ok=True)
     plt.figure(figsize=(10, 6))
 
     for label, color, plot_data in zip(MODEL_LABELS, MODEL_COLORS, model_plot_data):
-        x_values, y_values = _series_from_plot_data(plot_data, split, metric_index)
+        x_values, y_values = series_from_plot_data(plot_data, split, metric_index)
         if x_values:
             plt.plot(x_values, y_values, label=label, color=color, linewidth=2)
 
@@ -39,7 +45,7 @@ def _plot_metric(model_plot_data, split, metric_index, title, y_label, filename)
 
 
 def plot_train_loss(lstm_plot_data, rnn_plot_data, gru_plot_data):
-    _plot_metric(
+    plot_metric(
         (lstm_plot_data, rnn_plot_data, gru_plot_data),
         split="train",
         metric_index=1,
@@ -50,7 +56,7 @@ def plot_train_loss(lstm_plot_data, rnn_plot_data, gru_plot_data):
 
 
 def plot_test_loss(lstm_plot_data, rnn_plot_data, gru_plot_data):
-    _plot_metric(
+    plot_metric(
         (lstm_plot_data, rnn_plot_data, gru_plot_data),
         split="test",
         metric_index=1,
@@ -61,7 +67,7 @@ def plot_test_loss(lstm_plot_data, rnn_plot_data, gru_plot_data):
 
 
 def plot_train_accuracy(lstm_plot_data, rnn_plot_data, gru_plot_data):
-    _plot_metric(
+    plot_metric(
         (lstm_plot_data, rnn_plot_data, gru_plot_data),
         split="train",
         metric_index=2,
@@ -72,7 +78,7 @@ def plot_train_accuracy(lstm_plot_data, rnn_plot_data, gru_plot_data):
 
 
 def plot_test_accuracy(lstm_plot_data, rnn_plot_data, gru_plot_data):
-    _plot_metric(
+    plot_metric(
         (lstm_plot_data, rnn_plot_data, gru_plot_data),
         split="test",
         metric_index=2,
@@ -93,7 +99,7 @@ def plot_validation_loss_curve(val_history, run_label, num_heads, num_layers, co
     plt.plot(steps, losses, linewidth=2)
     plt.xlabel("Training Step")
     plt.ylabel("Validation Loss")
-    plt.title(f"Validation Loss Curve - {run_label}")
+    # plt.title(f"Validation Loss Curve - {run_label}")
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
 
@@ -107,7 +113,55 @@ def plot_validation_loss_curve(val_history, run_label, num_heads, num_layers, co
     plt.close()
 
 
-def plot_attention(attn_maps, tokens, layer_idx=0, head_idx=0, num_heads=4, num_layers=2, context_length=64, with_pos_enc=True, with_causal_mask=True):
+def plot_training_loss_curve(train_history, run_label, num_heads, num_layers, context_length, with_pos_enc=True, with_causal_mask=True):
+    if not train_history:
+        return
+
+    RESULTS_DIR.mkdir(exist_ok=True)
+    steps = [point[0] for point in train_history]
+    losses = [point[1] for point in train_history]
+
+    plt.figure(figsize=(8, 5))
+    plt.plot(steps, losses, linewidth=2)
+    plt.xlabel("Training Step")
+    plt.ylabel("Training Loss")
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+
+    fig_title = f"train_loss_{run_label}_heads_{num_heads}_layers_{num_layers}_context_{context_length}"
+    if not with_pos_enc:
+        fig_title += "_no_pos_enc"
+    if not with_causal_mask:
+        fig_title += "_no_causal_mask"
+
+    plt.savefig(RESULTS_DIR / f"{fig_title}.png", dpi=300, bbox_inches="tight")
+    plt.close()
+
+
+def plot_loss_comparison(run_histories, metric_key, y_label, filename):
+    if not run_histories:
+        return
+
+    RESULTS_DIR.mkdir(exist_ok=True)
+    plt.figure(figsize=(9, 5.5))
+
+    for run_label, history in run_histories:
+        if not history:
+            continue
+        steps = [point[0] for point in history]
+        losses = [point[1] for point in history]
+        plt.plot(steps, losses, linewidth=2, label=run_label)
+
+    plt.xlabel("Training Step")
+    plt.ylabel(y_label)
+    plt.grid(True, alpha=0.3)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(RESULTS_DIR / filename, dpi=300, bbox_inches="tight")
+    plt.close()
+
+
+def plot_attention(attn_maps, tokens, layer_idx=0, head_idx=0, num_heads=4, num_layers=2, context_length=64, with_pos_enc=True, with_causal_mask=True, output_subdir=None):
     """
     attn_maps[layer_idx]: [1, heads, T, T]
     """
@@ -128,10 +182,11 @@ def plot_attention(attn_maps, tokens, layer_idx=0, head_idx=0, num_heads=4, num_
     if not with_causal_mask:
         fig_title += "_no_causal_mask"
         
-    plt.savefig(RESULTS_DIR / f"{fig_title}.png", dpi=300, bbox_inches="tight")
+    output_dir = _results_subdir(output_subdir)
+    plt.savefig(output_dir / f"{fig_title}.png", dpi=300, bbox_inches="tight")
     plt.close()
 
-def plot_avg_attention(attn_maps, tokens, layer_idx=0, num_heads=4, num_layers=2, context_length=64, with_pos_enc=True, with_causal_mask=True):
+def plot_avg_attention(attn_maps, tokens, layer_idx=0, num_heads=4, num_layers=2, context_length=64, with_pos_enc=True, with_causal_mask=True, output_subdir=None):
     # [1, heads, T, T] -> average over heads -> [T, T]
     attn = attn_maps[layer_idx][0].mean(dim=0)
 
@@ -151,7 +206,8 @@ def plot_avg_attention(attn_maps, tokens, layer_idx=0, num_heads=4, num_layers=2
     if not with_causal_mask:
         fig_title += "_no_causal_mask"
         
-    plt.savefig(RESULTS_DIR / f"{fig_title}.png", dpi=300, bbox_inches="tight")
+    output_dir = _results_subdir(output_subdir)
+    plt.savefig(output_dir / f"{fig_title}.png", dpi=300, bbox_inches="tight")
     plt.close()
 
 

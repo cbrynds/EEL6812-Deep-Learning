@@ -7,6 +7,8 @@ from plotting_utils import (
     compute_attention_entropy,
     plot_attention,
     plot_avg_attention,
+    plot_loss_comparison,
+    plot_training_loss_curve,
     plot_validation_loss_curve,
 )
 
@@ -197,6 +199,7 @@ def train_and_evaluate_model(
     with_pos_enc=True,
     with_causal_mask=True,
     run_label="run",
+    attention_output_subdir=None,
 ):
     model = CharTransformerLM(
         vocab_size=vocab_size,
@@ -218,6 +221,7 @@ def train_and_evaluate_model(
     optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4)
 
     num_epochs = 5
+    train_history = []
     val_history = []
 
     for epoch in range(num_epochs):
@@ -237,7 +241,9 @@ def train_and_evaluate_model(
             if (step + 1) % 200 == 0:
                 avg_train = running_loss / 200
                 val_loss = evaluate(model, val_loader, max_batches=20, device=device, with_pos_enc=with_pos_enc, with_causal_mask=with_causal_mask)
-                val_history.append((epoch * len(train_loader) + step + 1, val_loss))
+                current_step = epoch * len(train_loader) + step + 1
+                train_history.append((current_step, avg_train))
+                val_history.append((current_step, val_loss))
                 print(f"Epoch {epoch+1}, Step {step+1}, Train Loss: {avg_train:.4f}, Val Loss: {val_loss:.4f}")
                 running_loss = 0.0
 
@@ -250,10 +256,23 @@ def train_and_evaluate_model(
         with_causal_mask=with_causal_mask,
     )
     final_step = num_epochs * len(train_loader)
+    if running_loss > 0.0:
+        remaining_steps = len(train_loader) % 200 or min(len(train_loader), 200)
+        final_train_loss = running_loss / remaining_steps
+        train_history.append((final_step, final_train_loss))
     if not val_history or val_history[-1][0] != final_step:
         val_history.append((final_step, final_val_loss))
 
     print(f"Final validation loss ({run_label}): {final_val_loss:.4f}")
+    plot_training_loss_curve(
+        train_history,
+        run_label=run_label,
+        num_heads=num_heads,
+        num_layers=num_layers,
+        context_length=context_length,
+        with_pos_enc=with_pos_enc,
+        with_causal_mask=with_causal_mask,
+    )
     plot_validation_loss_curve(
         val_history,
         run_label=run_label,
@@ -311,7 +330,8 @@ def train_and_evaluate_model(
         num_layers=num_layers,
         context_length=context_length,
         with_pos_enc=with_pos_enc,
-        with_causal_mask=with_causal_mask
+        with_causal_mask=with_causal_mask,
+        output_subdir=attention_output_subdir,
     )
     if num_layers > 1 and num_heads > 1:
         plot_attention(
@@ -323,7 +343,8 @@ def train_and_evaluate_model(
             num_layers=num_layers,
             context_length=context_length,
             with_pos_enc=with_pos_enc,
-            with_causal_mask=with_causal_mask
+            with_causal_mask=with_causal_mask,
+            output_subdir=attention_output_subdir,
         )
 
     # =========================================================
@@ -338,7 +359,8 @@ def train_and_evaluate_model(
         num_layers=num_layers,
         context_length=context_length,
         with_pos_enc=with_pos_enc,
-        with_causal_mask=with_causal_mask
+        with_causal_mask=with_causal_mask,
+        output_subdir=attention_output_subdir,
     )
     if num_layers > 1:
         plot_avg_attention(
@@ -349,13 +371,15 @@ def train_and_evaluate_model(
             num_layers=num_layers,
             context_length=context_length,
             with_pos_enc=with_pos_enc,
-            with_causal_mask=with_causal_mask
+            with_causal_mask=with_causal_mask,
+            output_subdir=attention_output_subdir,
         )
 
     return {
         "run_label": run_label,
         "final_val_loss": final_val_loss,
         "avg_entropy_per_layer": avg_entropy_per_layer,
+        "train_history": train_history,
         "val_history": val_history,
     }
 
@@ -412,6 +436,7 @@ def main():
     runs = []
 
     # Control run
+    print(f"Running control with {base_num_heads} heads, {base_num_layers} layers, {base_context_length} context length")
     runs.append(
         train_and_evaluate_model(
             train_loader,
@@ -422,10 +447,11 @@ def main():
             base_context_length,
             device,
             run_label="control",
+            attention_output_subdir="attention_maps/control",
         )
     )
     
-    # Without positional encodings
+    print(f"Running default parameters without positional encodings")
     runs.append(
         train_and_evaluate_model(
             train_loader,
@@ -437,10 +463,11 @@ def main():
             device,
             with_pos_enc=False,
             run_label="no_pos_enc",
+            attention_output_subdir="attention_maps/no_positional_encoding",
         )
     )
 
-    # Without causal masking
+    print(f"Running default parameters without causal masking")
     runs.append(
         train_and_evaluate_model(
             train_loader,
@@ -452,11 +479,12 @@ def main():
             device,
             with_causal_mask=False,
             run_label="no_causal_mask",
+            attention_output_subdir="attention_maps/no_causal_masking",
         )
     )
     
     for num_heads in ablation_num_heads:
-        print(f"Running with num_heads={num_heads}, num_layers={base_num_layers}, context_length={base_context_length}")
+        print(f"Running with {num_heads} attention heads, {base_num_layers} layers, {base_context_length} context length")
         runs.append(
             train_and_evaluate_model(
                 train_loader,
@@ -467,11 +495,12 @@ def main():
                 base_context_length,
                 device,
                 run_label=f"heads_{num_heads}",
+                attention_output_subdir=f"attention_maps/heads_{num_heads}",
             )
         )
 
     for num_layers in ablation_num_layers:
-        print(f"Running with num_heads={base_num_heads}, num_layers={num_layers}, context_length={base_context_length}")
+        print(f"Running with {base_num_heads} attention heads, {num_layers} layers, {base_context_length} context length")
         runs.append(
             train_and_evaluate_model(
                 train_loader,
@@ -482,6 +511,7 @@ def main():
                 base_context_length,
                 device,
                 run_label=f"layers_{num_layers}",
+                attention_output_subdir=f"attention_maps/layers_{num_layers}",
             )
         )
 
@@ -490,8 +520,8 @@ def main():
         val_dataset = CharDataset(val_data, context_length)
         train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
         val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, drop_last=True)
-    
-        print(f"Running with num_heads={base_num_heads}, num_layers={base_num_layers}, context_length={context_length}")
+
+        print(f"Running with {base_num_heads} attention heads, {base_num_layers} layers, {context_length} context length")
         runs.append(
             train_and_evaluate_model(
                 train_loader,
@@ -502,6 +532,7 @@ def main():
                 context_length,
                 device,
                 run_label=f"context_{context_length}",
+                attention_output_subdir=f"attention_maps/context_{context_length}",
             )
         )
 
@@ -511,6 +542,60 @@ def main():
             f"{run['run_label']}: final_val_loss={run['final_val_loss']:.4f}, "
             f"avg_entropy_per_layer={run['avg_entropy_per_layer']}"
         )
+
+    run_map = {run["run_label"]: run for run in runs}
+
+    plot_loss_comparison(
+        [
+            ("With Positional Encoding", run_map["control"]["val_history"]),
+            ("Without Positional Encoding", run_map["no_pos_enc"]["val_history"]),
+        ],
+        metric_key="val_history",
+        y_label="Validation Loss",
+        filename="val_loss_positional_encoding_comparison.png",
+    )
+
+    plot_loss_comparison(
+        [
+            ("1 Layer", run_map["layers_1"]["val_history"]),
+            ("2 Layers", run_map["control"]["val_history"]),
+            ("4 Layers", run_map["layers_4"]["val_history"]),
+        ],
+        metric_key="val_history",
+        y_label="Validation Loss",
+        filename="val_loss_layers_comparison.png",
+    )
+
+    plot_loss_comparison(
+        [
+            ("32 Context Length", run_map["context_32"]["val_history"]),
+            ("64 Context Length", run_map["control"]["val_history"]),
+            ("128 Context Length", run_map["context_128"]["val_history"]),
+        ],
+        metric_key="val_history",
+        y_label="Validation Loss",
+        filename="val_loss_context_length_comparison.png",
+    )
+
+    plot_loss_comparison(
+        [
+            ("With Causal Mask", run_map["control"]["train_history"]),
+            ("Without Causal Mask", run_map["no_causal_mask"]["train_history"]),
+        ],
+        metric_key="train_history",
+        y_label="Training Loss",
+        filename="train_loss_causal_mask_comparison.png",
+    )
+
+    plot_loss_comparison(
+        [
+            ("With Causal Mask", run_map["control"]["val_history"]),
+            ("Without Causal Mask", run_map["no_causal_mask"]["val_history"]),
+        ],
+        metric_key="val_history",
+        y_label="Validation Loss",
+        filename="val_loss_causal_mask_comparison.png",
+    )
 
 if __name__ == "__main__":
     main()
