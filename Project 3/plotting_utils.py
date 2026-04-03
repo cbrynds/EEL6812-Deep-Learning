@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import torch
 
 
 MODEL_LABELS = ("LSTM", "RNN", "GRU")
@@ -80,7 +81,33 @@ def plot_test_accuracy(lstm_plot_data, rnn_plot_data, gru_plot_data):
         filename="test_accuracy.png",
     )
 
-def plot_attention(attn_maps, tokens, layer_idx=0, head_idx=0):
+def plot_validation_loss_curve(val_history, run_label, num_heads, num_layers, context_length, with_pos_enc=True, with_causal_mask=True):
+    if not val_history:
+        return
+
+    RESULTS_DIR.mkdir(exist_ok=True)
+    steps = [point[0] for point in val_history]
+    losses = [point[1] for point in val_history]
+
+    plt.figure(figsize=(8, 5))
+    plt.plot(steps, losses, linewidth=2)
+    plt.xlabel("Training Step")
+    plt.ylabel("Validation Loss")
+    plt.title(f"Validation Loss Curve - {run_label}")
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+
+    fig_title = f"val_loss_{run_label}_heads_{num_heads}_layers_{num_layers}_context_{context_length}"
+    if not with_pos_enc:
+        fig_title += "_no_pos_enc"
+    if not with_causal_mask:
+        fig_title += "_no_causal_mask"
+
+    plt.savefig(RESULTS_DIR / f"{fig_title}.png", dpi=300, bbox_inches="tight")
+    plt.close()
+
+
+def plot_attention(attn_maps, tokens, layer_idx=0, head_idx=0, num_heads=4, num_layers=2, context_length=64, with_pos_enc=True, with_causal_mask=True):
     """
     attn_maps[layer_idx]: [1, heads, T, T]
     """
@@ -95,9 +122,16 @@ def plot_attention(attn_maps, tokens, layer_idx=0, head_idx=0):
     plt.ylabel("Query positions")
     plt.title(f"Attention Map - Layer {layer_idx}, Head {head_idx}")
     plt.tight_layout()
-    plt.savefig(f"attention_layer{layer_idx}_head{head_idx}.png")
-    
-def plot_avg_attention(attn_maps, tokens, layer_idx=0):
+    fig_title = f"attention_layer_{layer_idx}_head_{head_idx}_heads_{num_heads}_layers_{num_layers}_context_{context_length}"
+    if not with_pos_enc:
+        fig_title += "_no_pos_enc"
+    if not with_causal_mask:
+        fig_title += "_no_causal_mask"
+        
+    plt.savefig(RESULTS_DIR / f"{fig_title}.png", dpi=300, bbox_inches="tight")
+    plt.close()
+
+def plot_avg_attention(attn_maps, tokens, layer_idx=0, num_heads=4, num_layers=2, context_length=64, with_pos_enc=True, with_causal_mask=True):
     # [1, heads, T, T] -> average over heads -> [T, T]
     attn = attn_maps[layer_idx][0].mean(dim=0)
 
@@ -110,4 +144,23 @@ def plot_avg_attention(attn_maps, tokens, layer_idx=0):
     plt.ylabel("Query positions")
     plt.title(f"Average Attention - Layer {layer_idx}")
     plt.tight_layout()
-    plt.savefig(f"average_attention_layer{layer_idx}.png")
+
+    fig_title = f"average_attention_layer_{layer_idx}_heads_{num_heads}_layers_{num_layers}_context_{context_length}"
+    if not with_pos_enc:
+        fig_title += "_no_pos_enc"
+    if not with_causal_mask:
+        fig_title += "_no_causal_mask"
+        
+    plt.savefig(RESULTS_DIR / f"{fig_title}.png", dpi=300, bbox_inches="tight")
+    plt.close()
+
+
+def compute_attention_entropy(attn_maps):
+    entropies = []
+
+    for layer_attn in attn_maps:
+        probs = layer_attn.clamp_min(1e-12)
+        layer_entropy = -(probs * torch.log(probs)).sum(dim=-1)
+        entropies.append(layer_entropy.mean().item())
+
+    return entropies
