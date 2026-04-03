@@ -79,3 +79,35 @@ def plot_test_accuracy(lstm_plot_data, rnn_plot_data, gru_plot_data):
         y_label="Accuracy",
         filename="test_accuracy.png",
     )
+
+def plot_attention(attn_maps, tokens, layer_idx=0, head_idx=0):
+    """
+    attn_maps[layer_idx]: [1, heads, T, T]
+    """
+    attn = attn_maps[layer_idx][0, head_idx]  # [T, T]
+
+    plt.figure(figsize=(8, 6))
+    plt.imshow(attn, aspect="auto")
+    plt.colorbar()
+    plt.xticks(range(len(tokens)), tokens, rotation=90)
+    plt.yticks(range(len(tokens)), tokens)
+    plt.xlabel("Key positions (attended to)")
+    plt.ylabel("Query positions")
+    plt.title(f"Attention Map - Layer {layer_idx}, Head {head_idx}")
+    plt.tight_layout()
+    plt.savefig(f"attention_layer{layer_idx}_head{head_idx}.png")
+    
+def plot_avg_attention(attn_maps, tokens, layer_idx=0):
+    # [1, heads, T, T] -> average over heads -> [T, T]
+    attn = attn_maps[layer_idx][0].mean(dim=0)
+
+    plt.figure(figsize=(8, 6))
+    plt.imshow(attn, aspect="auto")
+    plt.colorbar()
+    plt.xticks(range(len(tokens)), tokens, rotation=90)
+    plt.yticks(range(len(tokens)), tokens)
+    plt.xlabel("Key positions (attended to)")
+    plt.ylabel("Query positions")
+    plt.title(f"Average Attention - Layer {layer_idx}")
+    plt.tight_layout()
+    plt.savefig(f"average_attention_layer{layer_idx}.png")
