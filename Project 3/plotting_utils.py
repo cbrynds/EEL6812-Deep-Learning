@@ -35,7 +35,7 @@ def plot_metric(model_plot_data, split, metric_index, title, y_label, filename):
             plt.plot(x_values, y_values, label=label, color=color, linewidth=2)
 
     # plt.title(title)
-    plt.xlabel("Iteration")
+    plt.xlabel("Epoch")
     plt.ylabel(y_label)
     plt.grid(True, alpha=0.3)
     plt.legend()
