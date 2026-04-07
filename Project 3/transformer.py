@@ -227,8 +227,9 @@ def train_and_evaluate_model(
     for epoch in range(num_epochs):
         model.train()
         running_loss = 0.0
+        steps_in_epoch = 0
 
-        for step, (x, y) in enumerate(train_loader):
+        for x, y in train_loader:
             x, y = x.to(device), y.to(device)
 
             optimizer.zero_grad()
@@ -237,15 +238,21 @@ def train_and_evaluate_model(
             optimizer.step()
 
             running_loss += loss.item()
+            steps_in_epoch += 1
 
-            if (step + 1) % 200 == 0:
-                avg_train = running_loss / 200
-                val_loss = evaluate(model, val_loader, max_batches=20, device=device, with_pos_enc=with_pos_enc, with_causal_mask=with_causal_mask)
-                current_step = epoch * len(train_loader) + step + 1
-                train_history.append((current_step, avg_train))
-                val_history.append((current_step, val_loss))
-                print(f"Epoch {epoch+1}, Step {step+1}, Train Loss: {avg_train:.4f}, Val Loss: {val_loss:.4f}")
-                running_loss = 0.0
+        avg_train = running_loss / steps_in_epoch
+        val_loss = evaluate(
+            model,
+            val_loader,
+            max_batches=20,
+            device=device,
+            with_pos_enc=with_pos_enc,
+            with_causal_mask=with_causal_mask,
+        )
+        current_epoch = epoch + 1
+        train_history.append((current_epoch, avg_train))
+        val_history.append((current_epoch, val_loss))
+        print(f"Epoch {current_epoch}, Train Loss: {avg_train:.4f}, Val Loss: {val_loss:.4f}")
 
     final_val_loss = evaluate(
         model,
@@ -255,13 +262,11 @@ def train_and_evaluate_model(
         with_pos_enc=with_pos_enc,
         with_causal_mask=with_causal_mask,
     )
-    final_step = num_epochs * len(train_loader)
-    if running_loss > 0.0:
-        remaining_steps = len(train_loader) % 200 or min(len(train_loader), 200)
-        final_train_loss = running_loss / remaining_steps
-        train_history.append((final_step, final_train_loss))
-    if not val_history or val_history[-1][0] != final_step:
-        val_history.append((final_step, final_val_loss))
+    final_epoch = num_epochs
+    if val_history and val_history[-1][0] == final_epoch:
+        val_history[-1] = (final_epoch, final_val_loss)
+    else:
+        val_history.append((final_epoch, final_val_loss))
 
     print(f"Final validation loss ({run_label}): {final_val_loss:.4f}")
     plot_training_loss_curve(

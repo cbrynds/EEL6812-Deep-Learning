@@ -92,12 +92,12 @@ def plot_validation_loss_curve(val_history, run_label, num_heads, num_layers, co
         return
 
     RESULTS_DIR.mkdir(exist_ok=True)
-    steps = [point[0] for point in val_history]
+    epochs = [point[0] for point in val_history]
     losses = [point[1] for point in val_history]
 
     plt.figure(figsize=(8, 5))
-    plt.plot(steps, losses, linewidth=2)
-    plt.xlabel("Training Step")
+    plt.plot(epochs, losses, linewidth=2)
+    plt.xlabel("Epoch")
     plt.ylabel("Validation Loss")
     # plt.title(f"Validation Loss Curve - {run_label}")
     plt.grid(True, alpha=0.3)
@@ -118,12 +118,12 @@ def plot_training_loss_curve(train_history, run_label, num_heads, num_layers, co
         return
 
     RESULTS_DIR.mkdir(exist_ok=True)
-    steps = [point[0] for point in train_history]
+    epochs = [point[0] for point in train_history]
     losses = [point[1] for point in train_history]
 
     plt.figure(figsize=(8, 5))
-    plt.plot(steps, losses, linewidth=2)
-    plt.xlabel("Training Step")
+    plt.plot(epochs, losses, linewidth=2)
+    plt.xlabel("Epoch")
     plt.ylabel("Training Loss")
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
@@ -148,11 +148,11 @@ def plot_loss_comparison(run_histories, metric_key, y_label, filename):
     for run_label, history in run_histories:
         if not history:
             continue
-        steps = [point[0] for point in history]
+        epochs = [point[0] for point in history]
         losses = [point[1] for point in history]
-        plt.plot(steps, losses, linewidth=2, label=run_label)
+        plt.plot(epochs, losses, linewidth=2, label=run_label)
 
-    plt.xlabel("Training Step")
+    plt.xlabel("Epoch")
     plt.ylabel(y_label)
     plt.grid(True, alpha=0.3)
     plt.legend()
