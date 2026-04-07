@@ -7,8 +7,8 @@
 #SBATCH --mem=16G
 #SBATCH --time=04:00:00
 
-source venv/bin/activate
-
+source /apps/anaconda/anaconda-2023.09/etc/profile.d/conda.sh
+conda activate pytorch2.2.0+py3.11+cuda12.1
 set -euo pipefail
 
 mkdir -p logs results
@@ -20,5 +20,8 @@ export MKL_NUM_THREADS=1
 export NUMEXPR_NUM_THREADS=1
 export VECLIB_MAXIMUM_THREADS=1
 export PYTHONUNBUFFERED=1
+
+nvidia-smi
+python -c "import torch; print(torch.__version__); print(torch.cuda.is_available()); print($
 
 python3 transformer.py
