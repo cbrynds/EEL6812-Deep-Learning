@@ -220,7 +220,7 @@ def train_and_evaluate_model(
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4)
 
-    num_epochs = 5
+    num_epochs = 10
     train_history = []
     val_history = []
 
