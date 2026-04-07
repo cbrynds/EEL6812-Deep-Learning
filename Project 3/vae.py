@@ -169,7 +169,7 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
     latent_dim = 20
-    epochs = 10
+    epochs = 100
     
     # Default training with BCE loss
     _, bce_plot_data = train(latent_dim=latent_dim, device=device, criterion=nn.BCELoss(), epochs=epochs)
