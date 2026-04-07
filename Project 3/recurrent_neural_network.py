@@ -179,6 +179,7 @@ class SimpleRecurrentClassifier(torch.nn.Module) :
 
 def main():
     B=32  # Batch Size
+    num_epochs = 1000
     EmbeddedRepeat = 5 # Number of Reber Grammar Strings between Prefix/Suffix in ERG
     train = ReberDataset(split="train", size=6000, repeat=EmbeddedRepeat)
     test = ReberDataset(split="test", size=2000, repeat=EmbeddedRepeat)
@@ -199,7 +200,7 @@ def main():
     print(torchinfo.summary(model))
     print(model)
 
-    lstm_plot_data = train_model(model, train_loader, test_loader, device)
+    lstm_plot_data = train_model(model, train_loader, test_loader, device, epochs=num_epochs)
 
     model = SimpleRecurrentClassifier(recurrent_type=nn.RNN)
     model.to(device)
@@ -207,7 +208,7 @@ def main():
     print(torchinfo.summary(model))
     print(model)
 
-    rnn_plot_data = train_model(model, train_loader, test_loader, device)
+    rnn_plot_data = train_model(model, train_loader, test_loader, device, epochs=num_epochs)
 
     model = SimpleRecurrentClassifier(recurrent_type=nn.GRU)
     model.to(device)
@@ -215,7 +216,7 @@ def main():
     print(torchinfo.summary(model))
     print(model)
 
-    gru_plot_data = train_model(model, train_loader, test_loader, device)
+    gru_plot_data = train_model(model, train_loader, test_loader, device, epochs=num_epochs)
 
     # Plot Train Loss, Test Loss, Train accuracy, Test accuracy
     plot_train_loss(lstm_plot_data, rnn_plot_data, gru_plot_data)
