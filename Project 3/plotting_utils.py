@@ -38,7 +38,7 @@ def plot_metric(model_plot_data, split, metric_index, title, y_label, filename):
     plt.xlabel("Iteration")
     plt.ylabel(y_label)
     plt.grid(True, alpha=0.3)
-    # plt.legend()
+    plt.legend()
     plt.tight_layout()
     plt.savefig(RESULTS_DIR / filename, dpi=300, bbox_inches="tight")
     plt.close()
@@ -158,6 +158,56 @@ def plot_loss_comparison(run_histories, metric_key, y_label, filename):
     plt.legend()
     plt.tight_layout()
     plt.savefig(RESULTS_DIR / filename, dpi=300, bbox_inches="tight")
+    plt.close()
+
+
+def plot_vae_loss(plot_data, loss_label = "BCE Reconstruction Loss", filename="vae_loss.png"):
+    if not plot_data:
+        return
+
+    output_dir = Path(__file__).resolve().parent / "vae_results"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    epochs = list(range(1, len(plot_data) + 1))
+    total_loss = [point["loss"] for point in plot_data]
+    reconstruction_loss = [point["reconstruction_loss"] for point in plot_data]
+    kld_loss = [point["kld_loss"] for point in plot_data]
+
+    plt.figure(figsize=(9, 5.5))
+    plt.plot(epochs, total_loss, linewidth=2, label="Total Loss", color="tab:blue")
+    plt.plot(epochs, reconstruction_loss, linewidth=2, label=loss_label, color="tab:orange")
+    plt.plot(epochs, kld_loss, linewidth=2, label="KL Divergence Loss", color="tab:green")
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.grid(True, alpha=0.3)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(output_dir / filename, dpi=300, bbox_inches="tight")
+    plt.close()
+
+
+def plot_vae_latent_dim_comparison(run_histories, filename="latent_dim_loss_comparison.png"):
+    if not run_histories:
+        return
+
+    output_dir = Path(__file__).resolve().parent / "vae_results"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    plt.figure(figsize=(9, 5.5))
+
+    for latent_dim, plot_data in run_histories:
+        if not plot_data:
+            continue
+        epochs = list(range(1, len(plot_data) + 1))
+        total_loss = [point["loss"] for point in plot_data]
+        plt.plot(epochs, total_loss, linewidth=2, label=f"Latent Dim = {latent_dim}")
+
+    plt.xlabel("Epoch")
+    plt.ylabel("Total Loss")
+    plt.grid(True, alpha=0.3)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(output_dir / filename, dpi=300, bbox_inches="tight")
     plt.close()
 
 
