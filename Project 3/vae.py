@@ -6,6 +6,7 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import os
+from pathlib import Path
 from plotting_utils import plot_vae_loss, plot_vae_latent_dim_comparison
 
 # Define Variational Autoencoder (VAE)
@@ -62,6 +63,9 @@ def loss_function(criterion,recon_x, x, mu, sigma, beta):
 
 # Inference
 def generate_images(vae, latent_dim, device, num_images=10, filename="unconditional_generation.png"):
+    output_dir = Path(__file__).resolve().parent / "vae_results"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
     vae.eval()
     z = torch.randn(num_images, latent_dim).to(device)
     with torch.no_grad():
@@ -72,7 +76,7 @@ def generate_images(vae, latent_dim, device, num_images=10, filename="unconditio
         plt.imshow(generated_imgs[i].view(28, 28), cmap='gray')
         plt.axis('off')
     plt.tight_layout()
-    plt.savefig(f"vae_results/{filename}")
+    plt.savefig(f"{output_dir}/{filename}")
     plt.close()
 
 def find_mnist_image_target(dataloader, target_digit):
@@ -83,6 +87,9 @@ def find_mnist_image_target(dataloader, target_digit):
     return None
 
 def conditional_generate_images(vae, latent_dim, target_digit, dataloader, device="cpu", num_images=10, filename=None):
+    output_dir = Path(__file__).resolve().parent / "vae_results"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
     vae.eval()
     target_image = find_mnist_image_target(dataloader, target_digit)
     if target_image is None:
@@ -105,10 +112,11 @@ def conditional_generate_images(vae, latent_dim, target_digit, dataloader, devic
         plt.imshow(generated_imgs[i].view(28, 28), cmap='gray')
         plt.axis('off')
     plt.tight_layout()
-    plt.savefig(f"vae_results/{filename}")
+    
+    plt.savefig(f"{output_dir}/{filename}")
     plt.close()
 
-def train(latent_dim=20, device="cpu", criterion=nn.BCELoss(), epochs=10, beta=1):
+def train(latent_dim=20, device="cpu", criterion=nn.BCELoss(), epochs=20, beta=3):
     vae = VAE(latent_dim=latent_dim).to(device)
     optimizer = optim.Adam(vae.parameters(), lr=3e-4)
 
