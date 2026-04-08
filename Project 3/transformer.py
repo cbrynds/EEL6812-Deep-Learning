@@ -302,6 +302,28 @@ def train_and_evaluate_model(
         with_causal_mask=with_causal_mask,
     )
     print(sample)
+    
+    sample = generate(
+        model,
+        "JULIET:\n",
+        context_length,
+        max_new_tokens=300,
+        device=device,
+        with_pos_enc=with_pos_enc,
+        with_causal_mask=with_causal_mask,
+    )
+    print(sample)
+    
+    sample = generate(
+        model,
+        "To thine own self be true, And it must follow, as the night the day, Thou canst not then be false to any man.\n",
+        context_length,
+        max_new_tokens=300,
+        device=device,
+        with_pos_enc=with_pos_enc,
+        with_causal_mask=with_causal_mask,
+    )
+    print(sample)
 
     # =========================================================
     # 11. Analyze attention maps
