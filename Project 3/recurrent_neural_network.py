@@ -33,7 +33,7 @@ def pad_collate(batch):
   return xx_pad, yy, x_lens
 
 
-def train_model(model, train_loader, test_loader, device, epochs=1000, lr=0.001):
+def train_model(model, train_loader, test_loader, device, epochs=50, lr=0.001):
 
     # Add Loss function to be used 
     # I chose cross entropy loss, which is used commonly for classification tasks
@@ -179,7 +179,7 @@ class SimpleRecurrentClassifier(torch.nn.Module) :
 
 def main():
     B=32  # Batch Size
-    num_epochs = 1000
+    num_epochs = 50
     EmbeddedRepeat = 5 # Number of Reber Grammar Strings between Prefix/Suffix in ERG
     train = ReberDataset(split="train", size=6000, repeat=EmbeddedRepeat)
     test = ReberDataset(split="test", size=2000, repeat=EmbeddedRepeat)
