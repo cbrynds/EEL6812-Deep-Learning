@@ -1,12 +1,8 @@
-import random
-import itertools
 from torch.utils.data import Dataset, DataLoader
-from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence, pad_sequence
+from torch.nn.utils.rnn import pad_sequence
 import torch
-import matplotlib.pyplot as plt
 import matplotlib
 import torch.nn as nn
-import torch.nn.functional as F
 from plotting_utils import (
     plot_test_accuracy,
     plot_test_loss,
@@ -65,7 +61,6 @@ def train_model(model, train_loader, test_loader, device, epochs=50, lr=0.001):
             correct += (pred == y).float().sum().item()
             sum_loss += loss.item()*y.shape[0]
             total += y.shape[0]
-            avg_len = torch.mean(torch.tensor(l, dtype=float)).item()
             
         train_loss = sum_loss / total
         train_acc = correct / total
@@ -79,47 +74,11 @@ def train_model(model, train_loader, test_loader, device, epochs=50, lr=0.001):
         plot_data['test'].append((i+1, test_loss, test_acc))
     return plot_data
 
-
-def summarize_and_print_metrics(model_name, plot_data):
-    train_epochs = plot_data["train"]
-    test_epochs = plot_data["test"]
-
-    final_train_epoch, final_train_loss, final_train_acc = train_epochs[-1]
-    final_test_epoch, final_test_loss, final_test_acc = test_epochs[-1]
-
-    min_train_loss_epoch, min_train_loss, _ = min(train_epochs, key=lambda x: x[1])
-    max_train_acc_epoch, _, max_train_acc = max(train_epochs, key=lambda x: x[2])
-    min_test_loss_epoch, min_test_loss, _ = min(test_epochs, key=lambda x: x[1])
-    max_test_acc_epoch, _, max_test_acc = max(test_epochs, key=lambda x: x[2])
-
-    print(f"\n{model_name} Metrics Summary:")
-    print(
-        f"Final Training Loss: {final_train_loss:.4f} | "
-        f"Final Training Accuracy: {final_train_acc * 100:.2f}%"
-    )
-    print(
-        f"Final Testing Loss:  {final_test_loss:.4f} | "
-        f"Final Testing Accuracy:  {final_test_acc * 100:.2f}%"
-    )
-    print(
-        f"Minimum Training Loss: {min_train_loss:.4f} at epoch {min_train_loss_epoch}"
-    )
-    print(
-        f"Maximum Training Accuracy: {max_train_acc * 100:.2f}% at epoch {max_train_acc_epoch}"
-    )
-    print(
-        f"Minimum Testing Loss: {min_test_loss:.4f} at epoch {min_test_loss_epoch}"
-    )
-    print(
-        f"Maximum Testing Accuracy: {max_test_acc * 100:.2f}% at epoch {max_test_acc_epoch}"
-    )
-
 def test_metrics (model, loader, device):
     model.eval()
     correct = 0
     total = 0
     sum_loss = 0.0
-    sum_ae = 0.0
     criterion = torch.nn.CrossEntropyLoss()
     with torch.no_grad():
         for i, (x, y, l) in enumerate(loader):
@@ -133,9 +92,6 @@ def test_metrics (model, loader, device):
             total += y.shape[0]
             sum_loss += loss*y.shape[0]
     return (sum_loss/total).item(), (correct/total)
-
-
-
 
 class SimpleRecurrentClassifier(torch.nn.Module) :
     def __init__(self, hidden_dim=64, embedding_dim=32, recurrent_type=nn.RNN) :
@@ -158,7 +114,7 @@ class SimpleRecurrentClassifier(torch.nn.Module) :
         # Convert symbols IDs of the sequence to embedding vectors
         x = self.embed(x)
 
-        # First, we pack using pack_padded_sequence so that we can efficiently process batches of variable length
+        # Pack using pack_padded_sequence so that we can efficiently process batches of variable length
         packed_x = nn.utils.rnn.pack_padded_sequence(x, s, batch_first=True, enforce_sorted=False)
 
         # Pass them to recurrent network
@@ -223,10 +179,6 @@ def main():
     plot_test_loss(lstm_plot_data, rnn_plot_data, gru_plot_data)
     plot_train_accuracy(lstm_plot_data, rnn_plot_data, gru_plot_data)
     plot_test_accuracy(lstm_plot_data, rnn_plot_data, gru_plot_data)
-
-    summarize_and_print_metrics("LSTM", lstm_plot_data)
-    summarize_and_print_metrics("RNN", rnn_plot_data)
-    summarize_and_print_metrics("GRU", gru_plot_data)
     
 if __name__ == "__main__":
     main()

@@ -1,0 +1,362 @@
+Using device: cuda
+Dataset length: 1115394
+First Citizen:
+Before we proceed any further, hear me speak.
+
+All:
+Speak, speak.
+
+First Citizen:
+You are all resolved rather to die than to famish?
+
+All:
+Resolved. resolved.
+
+First Citizen:
+First, you know Caius Marcius is chief enemy to the people.
+
+All:
+We know't, we know't.
+
+First Citizen:
+Let us kill him, and we'll have corn at our own price.
+Is't a verdict?
+
+All:
+No more talking on't; let it be done: away, away!
+
+Second Citizen:
+One word, good citizens.
+
+First Citizen:
+We are accounted poor
+Vocabulary size: 65
+{'\n': 0, ' ': 1, '!': 2, '$': 3, '&': 4, "'": 5, ',': 6, '-': 7, '.': 8, '3': 9, ':': 10, ';': 11, '?': 12, 'A': 13, 'B': 14, 'C': 15, 'D': 16, 'E': 17, 'F': 18, 'G': 19, 'H': 20, 'I': 21, 'J': 22, 'K': 23, 'L': 24, 'M': 25, 'N': 26, 'O': 27, 'P': 28, 'Q': 29, 'R': 30, 'S': 31, 'T': 32, 'U': 33, 'V': 34, 'W': 35, 'X': 36, 'Y': 37, 'Z': 38, 'a': 39, 'b': 40, 'c': 41, 'd': 42, 'e': 43, 'f': 44, 'g': 45, 'h': 46, 'i': 47, 'j': 48, 'k': 49, 'l': 50, 'm': 51, 'n': 52, 'o': 53, 'p': 54, 'q': 55, 'r': 56, 's': 57, 't': 58, 'u': 59, 'v': 60, 'w': 61, 'x': 62, 'y': 63, 'z': 64}
+Train dataset length: 1003790
+Val dataset length: 111476
+torch.Size([64, 64])
+torch.Size([64, 64])
+Running control with 4 heads, 2 layers, 64 context length
+Epoch 1, Train Loss: 1.7103, Val Loss: 1.4897
+Epoch 2, Train Loss: 1.5404, Val Loss: 1.4131
+Epoch 3, Train Loss: 1.5069, Val Loss: 1.3786
+Epoch 4, Train Loss: 1.4889, Val Loss: 1.3530
+Epoch 5, Train Loss: 1.4774, Val Loss: 1.3469
+Epoch 6, Train Loss: 1.4689, Val Loss: 1.3349
+Epoch 7, Train Loss: 1.4623, Val Loss: 1.3320
+Epoch 8, Train Loss: 1.4570, Val Loss: 1.3329
+Epoch 9, Train Loss: 1.4528, Val Loss: 1.3285
+Epoch 10, Train Loss: 1.4492, Val Loss: 1.3225
+Final validation loss (control): 1.3994
+ROMEO:
+Thou shalt pluck now for this face,
+What well saw in them and change, which was a moublain,
+Whose court'st, weak not not's on
+Margare: he queen jealous son that run hence
+To laments, whom nor the own way to Corioli,
+Were now you all; and these manys humour was, a perful elsed
+gates: but one our jeal
+Tokens: ['T', 'o', ' ', 'b', 'e', ',', ' ', 'o', 'r', ' ', 'n', 'o', 't', ' ', 't', 'o', ' ', 'b', 'e', ',', ' ', 't', 'h', 'a', 't', ' ', 'i', 's', ' ', 't', 'h', 'e', ' ', 'q', 'u', 'e', 's', 't', 'i', 'o', 'n', ':']
+Average attention entropy per layer (control): [0.45426031947135925, 1.05264151096344]
+Running default parameters without positional encodings
+Epoch 1, Train Loss: 2.1290, Val Loss: 1.9858
+Epoch 2, Train Loss: 1.9707, Val Loss: 1.8802
+Epoch 3, Train Loss: 1.9230, Val Loss: 1.8208
+Epoch 4, Train Loss: 1.8905, Val Loss: 1.7767
+Epoch 5, Train Loss: 1.8678, Val Loss: 1.7660
+Epoch 6, Train Loss: 1.8478, Val Loss: 1.7393
+Epoch 7, Train Loss: 1.8311, Val Loss: 1.7188
+Epoch 8, Train Loss: 1.8185, Val Loss: 1.6944
+Epoch 9, Train Loss: 1.8084, Val Loss: 1.6904
+Epoch 10, Train Loss: 1.7997, Val Loss: 1.6826
+Final validation loss (no_pos_enc): 1.7286
+ROMEO:
+Ay, your prist my should!
+
+GREMIO:
+
+Corendinsate mer:
+Grachey or t! Ang anow! urderges thewen, which wish cabry'd gang,
+But, o then, wenead. Even the
+willy o plp! sshenghe Eldwar's.
+
+HO be Howhew Ju s oy wire mard that Gromm; llet a that wit whoe s ithe fe.
+
+Secorvizene Lord THard ords Rephichard Si
+Tokens: ['T', 'o', ' ', 'b', 'e', ',', ' ', 'o', 'r', ' ', 'n', 'o', 't', ' ', 't', 'o', ' ', 'b', 'e', ',', ' ', 't', 'h', 'a', 't', ' ', 'i', 's', ' ', 't', 'h', 'e', ' ', 'q', 'u', 'e', 's', 't', 'i', 'o', 'n', ':']
+Average attention entropy per layer (no_pos_enc): [2.2838337421417236, 1.5850350856781006]
+Running default parameters without causal masking
+Epoch 1, Train Loss: 0.1077, Val Loss: 0.0306
+Epoch 2, Train Loss: 0.0296, Val Loss: 0.0280
+Epoch 3, Train Loss: 0.0279, Val Loss: 0.0267
+Epoch 4, Train Loss: 0.0270, Val Loss: 0.0256
+Epoch 5, Train Loss: 0.0265, Val Loss: 0.0250
+Epoch 6, Train Loss: 0.0261, Val Loss: 0.0248
+Epoch 7, Train Loss: 0.0258, Val Loss: 0.0244
+Epoch 8, Train Loss: 0.0255, Val Loss: 0.0243
+Epoch 9, Train Loss: 0.0253, Val Loss: 0.0242
+Epoch 10, Train Loss: 0.0251, Val Loss: 0.0235
+Final validation loss (no_causal_mask): 0.0242
+ROMEO:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+MENENIUS:
+A misst mised, if worsanger, I man.
+But good my talking of to reight.
+
+But wife, and mine thou cold'shole lost.
+Is glasp it grace.
+
+POMPEY:
+Yet shim ghand his cheeds, bleek thee, sile,
+And bidverem hanswer Gloucer:
+O is accorought mo
+Tokens: ['T', 'o', ' ', 'b', 'e', ',', ' ', 'o', 'r', ' ', 'n', 'o', 't', ' ', 't', 'o', ' ', 'b', 'e', ',', ' ', 't', 'h', 'a', 't', ' ', 'i', 's', ' ', 't', 'h', 'e', ' ', 'q', 'u', 'e', 's', 't', 'i', 'o', 'n', ':']
+Average attention entropy per layer (no_causal_mask): [1.9085890054702759, 0.31409916281700134]
+Running with 1 attention heads, 2 layers, 64 context length
+Epoch 1, Train Loss: 1.7921, Val Loss: 1.5702
+Epoch 2, Train Loss: 1.6336, Val Loss: 1.4906
+Epoch 3, Train Loss: 1.5979, Val Loss: 1.4514
+Epoch 4, Train Loss: 1.5793, Val Loss: 1.4355
+Epoch 5, Train Loss: 1.5676, Val Loss: 1.4230
+Epoch 6, Train Loss: 1.5592, Val Loss: 1.4097
+Epoch 7, Train Loss: 1.5527, Val Loss: 1.4051
+Epoch 8, Train Loss: 1.5477, Val Loss: 1.3955
+Epoch 9, Train Loss: 1.5434, Val Loss: 1.3884
+Epoch 10, Train Loss: 1.5397, Val Loss: 1.3823
+Final validation loss (heads_1): 1.4467
+ROMEO:
+Art best a swould know do depart his sound your fair?
+
+JULIET:
+My soverer's man, fair heel of Clifford!
+
+PAULINA:
+A badients, I we monder, sir, you unfend attemply,
+To professest, my sight he nemy separe
+The comfort
+Like to thee at I, whip nower.
+He is name that would England; let his peviction and 
+Tokens: ['T', 'o', ' ', 'b', 'e', ',', ' ', 'o', 'r', ' ', 'n', 'o', 't', ' ', 't', 'o', ' ', 'b', 'e', ',', ' ', 't', 'h', 'a', 't', ' ', 'i', 's', ' ', 't', 'h', 'e', ' ', 'q', 'u', 'e', 's', 't', 'i', 'o', 'n', ':']
+Average attention entropy per layer (heads_1): [0.9066616296768188, 1.5823533535003662]
+Running with 2 attention heads, 2 layers, 64 context length
+Epoch 1, Train Loss: 1.7470, Val Loss: 1.5144
+Epoch 2, Train Loss: 1.5832, Val Loss: 1.4494
+Epoch 3, Train Loss: 1.5500, Val Loss: 1.4176
+Epoch 4, Train Loss: 1.5318, Val Loss: 1.4043
+Epoch 5, Train Loss: 1.5195, Val Loss: 1.3889
+Epoch 6, Train Loss: 1.5102, Val Loss: 1.3804
+Epoch 7, Train Loss: 1.5025, Val Loss: 1.3663
+Epoch 8, Train Loss: 1.4960, Val Loss: 1.3581
+Epoch 9, Train Loss: 1.4908, Val Loss: 1.3603
+Epoch 10, Train Loss: 1.4866, Val Loss: 1.3482
+Final validation loss (heads_2): 1.4130
+ROMEO:
+Why, is not you were it.
+
+First Servingman:
+For must my staining well: I cannot supruded:
+O wick, can it now, another appear two him:
+That we, service away him home to depose?
+What wish us boy so.
+
+GLOUCESTER:
+Dedutio, he woman, good mine's thou desirest,
+Ay soft thyself.
+
+MENENIUS:
+Come, would shal
+Tokens: ['T', 'o', ' ', 'b', 'e', ',', ' ', 'o', 'r', ' ', 'n', 'o', 't', ' ', 't', 'o', ' ', 'b', 'e', ',', ' ', 't', 'h', 'a', 't', ' ', 'i', 's', ' ', 't', 'h', 'e', ' ', 'q', 'u', 'e', 's', 't', 'i', 'o', 'n', ':']
+Average attention entropy per layer (heads_2): [0.5875898003578186, 1.3781176805496216]
+Running with 8 attention heads, 2 layers, 64 context length
+Epoch 1, Train Loss: 1.6950, Val Loss: 1.4397
+Epoch 2, Train Loss: 1.5152, Val Loss: 1.3782
+Epoch 3, Train Loss: 1.4809, Val Loss: 1.3344
+Epoch 4, Train Loss: 1.4630, Val Loss: 1.3290
+Epoch 5, Train Loss: 1.4511, Val Loss: 1.3178
+Epoch 6, Train Loss: 1.4425, Val Loss: 1.3061
+Epoch 7, Train Loss: 1.4360, Val Loss: 1.2993
+Epoch 8, Train Loss: 1.4308, Val Loss: 1.3036
+Epoch 9, Train Loss: 1.4263, Val Loss: 1.2928
+Epoch 10, Train Loss: 1.4224, Val Loss: 1.2896
+Final validation loss (heads_8): 1.3669
+ROMEO:
+Marry?
+Without good son and courry, there,
+So for my name sexaler like a large day by than ancient.
+
+BUCKINGHAM:
+Not may thee, under Angelo; so 'tis told in them come,
+But his never affather.
+Why, that are changed worth the earth,
+Where is like face it in the crown. Nay, his again the news of humour
+Tokens: ['T', 'o', ' ', 'b', 'e', ',', ' ', 'o', 'r', ' ', 'n', 'o', 't', ' ', 't', 'o', ' ', 'b', 'e', ',', ' ', 't', 'h', 'a', 't', ' ', 'i', 's', ' ', 't', 'h', 'e', ' ', 'q', 'u', 'e', 's', 't', 'i', 'o', 'n', ':']
+Average attention entropy per layer (heads_8): [0.3836900293827057, 0.914940357208252]
+Running with 4 attention heads, 1 layers, 64 context length
+Epoch 1, Train Loss: 1.8676, Val Loss: 1.6894
+Epoch 2, Train Loss: 1.7173, Val Loss: 1.6374
+Epoch 3, Train Loss: 1.6890, Val Loss: 1.6063
+Epoch 4, Train Loss: 1.6745, Val Loss: 1.5748
+Epoch 5, Train Loss: 1.6657, Val Loss: 1.5805
+Epoch 6, Train Loss: 1.6593, Val Loss: 1.5696
+Epoch 7, Train Loss: 1.6541, Val Loss: 1.5621
+Epoch 8, Train Loss: 1.6500, Val Loss: 1.5567
+Epoch 9, Train Loss: 1.6458, Val Loss: 1.5455
+Epoch 10, Train Loss: 1.6417, Val Loss: 1.5440
+Final validation loss (layers_1): 1.5994
+ROMEO:
+I saw the was sknow their there thee alone the most with holow honour so callian: see,
+Since, Grom there may and in on lept in art is to severlanurs.
+
+HENRY BOLINGBROKE:
+But paligmation.
+
+HASTINGS:
+O to you hand! When die, and whenchild be the dead;
+And looks uppon theer Marcius me give sal to thou 
+Tokens: ['T', 'o', ' ', 'b', 'e', ',', ' ', 'o', 'r', ' ', 'n', 'o', 't', ' ', 't', 'o', ' ', 'b', 'e', ',', ' ', 't', 'h', 'a', 't', ' ', 'i', 's', ' ', 't', 'h', 'e', ' ', 'q', 'u', 'e', 's', 't', 'i', 'o', 'n', ':']
+Average attention entropy per layer (layers_1): [0.43333980441093445]
+Running with 4 attention heads, 4 layers, 64 context length
+Epoch 1, Train Loss: 1.6029, Val Loss: 1.3277
+Epoch 2, Train Loss: 1.4217, Val Loss: 1.2683
+Epoch 3, Train Loss: 1.3845, Val Loss: 1.2552
+Epoch 4, Train Loss: 1.3644, Val Loss: 1.2296
+Epoch 5, Train Loss: 1.3510, Val Loss: 1.2196
+Epoch 6, Train Loss: 1.3411, Val Loss: 1.2310
+Epoch 7, Train Loss: 1.3334, Val Loss: 1.2208
+Epoch 8, Train Loss: 1.3272, Val Loss: 1.2100
+Epoch 9, Train Loss: 1.3221, Val Loss: 1.2081
+Epoch 10, Train Loss: 1.3178, Val Loss: 1.2102
+Final validation loss (layers_4): 1.2990
+ROMEO:
+No doubt the love to see, is person to consul?
+
+DUKE OF YORK:
+O, good fair's word: 'tis to the wall; and take thee:
+So I would have no such wicked ignorant to hurteous
+holding, even lies and sword mean to our need
+On these leave--
+For do not my wounds and practise!
+But, that this neck can be satnuty
+Tokens: ['T', 'o', ' ', 'b', 'e', ',', ' ', 'o', 'r', ' ', 'n', 'o', 't', ' ', 't', 'o', ' ', 'b', 'e', ',', ' ', 't', 'h', 'a', 't', ' ', 'i', 's', ' ', 't', 'h', 'e', ' ', 'q', 'u', 'e', 's', 't', 'i', 'o', 'n', ':']
+Average attention entropy per layer (layers_4): [0.4581783711910248, 0.752857506275177, 1.1983213424682617, 1.3079774379730225]
+Running with 4 attention heads, 2 layers, 32 context length
+Epoch 1, Train Loss: 1.7591, Val Loss: 1.5661
+Epoch 2, Train Loss: 1.5986, Val Loss: 1.4845
+Epoch 3, Train Loss: 1.5647, Val Loss: 1.4556
+Epoch 4, Train Loss: 1.5469, Val Loss: 1.4312
+Epoch 5, Train Loss: 1.5353, Val Loss: 1.4264
+Epoch 6, Train Loss: 1.5271, Val Loss: 1.4154
+Epoch 7, Train Loss: 1.5205, Val Loss: 1.4095
+Epoch 8, Train Loss: 1.5155, Val Loss: 1.4017
+Epoch 9, Train Loss: 1.5113, Val Loss: 1.3907
+Epoch 10, Train Loss: 1.5076, Val Loss: 1.4010
+Final validation loss (context_32): 1.4632
+ROMEO:
+What's I ploy'd the war punished,
+Thus contern of thee against condemh was on a great till well have done the cumpted,
+Where is send sittle on like through.
+
+KING RICHARD III:
+
+ROMEO:
+Do, do now of him them of thy bove has my cheers
+Died a gentle mistress we are your rushings rights. Let's him I or 
+Tokens: ['T', 'o', ' ', 'b', 'e', ',', ' ', 'o', 'r', ' ', 'n', 'o', 't', ' ', 't', 'o', ' ', 'b', 'e', ',', ' ', 't', 'h', 'a', 't', ' ', 'i', 's', ' ', 't', 'h', 'e']
+Average attention entropy per layer (context_32): [0.2575080096721649, 0.895842969417572]
+Running with 4 attention heads, 2 layers, 128 context length
+Epoch 1, Train Loss: 1.6858, Val Loss: 1.4419
+Epoch 2, Train Loss: 1.5060, Val Loss: 1.3614
+Epoch 3, Train Loss: 1.4723, Val Loss: 1.3254
+Epoch 4, Train Loss: 1.4543, Val Loss: 1.3095
+Epoch 5, Train Loss: 1.4424, Val Loss: 1.2899
+Epoch 6, Train Loss: 1.4336, Val Loss: 1.2764
+Epoch 7, Train Loss: 1.4267, Val Loss: 1.2733
+Epoch 8, Train Loss: 1.4212, Val Loss: 1.2717
+Epoch 9, Train Loss: 1.4165, Val Loss: 1.2698
+Epoch 10, Train Loss: 1.4126, Val Loss: 1.2648
+Final validation loss (context_128): 1.3467
+ROMEO:
+No, our silence, let us not resember
+Of the word but accompion!
+
+CAMILLO:
+Five, did it with means help you hope.
+Play you, how her takingle dead;
+And, thou hast knowls! Thy lord, so heaven and in king.
+
+QUEEN MARGARET:
+And and but pardon your liege is not to begin:
+Upon my heart a true.
+
+EXTON:
+Test
+Tokens: ['T', 'o', ' ', 'b', 'e', ',', ' ', 'o', 'r', ' ', 'n', 'o', 't', ' ', 't', 'o', ' ', 'b', 'e', ',', ' ', 't', 'h', 'a', 't', ' ', 'i', 's', ' ', 't', 'h', 'e', ' ', 'q', 'u', 'e', 's', 't', 'i', 'o', 'n', ':']
+Average attention entropy per layer (context_128): [0.6115408539772034, 1.1274327039718628]
+
+Run summary:
+control: final_val_loss=1.3994, avg_entropy_per_layer=[0.45426031947135925, 1.05264151096344]
+no_pos_enc: final_val_loss=1.7286, avg_entropy_per_layer=[2.2838337421417236, 1.5850350856781006]
+no_causal_mask: final_val_loss=0.0242, avg_entropy_per_layer=[1.9085890054702759, 0.31409916281700134]
+heads_1: final_val_loss=1.4467, avg_entropy_per_layer=[0.9066616296768188, 1.5823533535003662]
+heads_2: final_val_loss=1.4130, avg_entropy_per_layer=[0.5875898003578186, 1.3781176805496216]
+heads_8: final_val_loss=1.3669, avg_entropy_per_layer=[0.3836900293827057, 0.914940357208252]
+layers_1: final_val_loss=1.5994, avg_entropy_per_layer=[0.43333980441093445]
+layers_4: final_val_loss=1.2990, avg_entropy_per_layer=[0.4581783711910248, 0.752857506275177, 1.1983213424682617, 1.3079774379730225]
+context_32: final_val_loss=1.4632, avg_entropy_per_layer=[0.2575080096721649, 0.895842969417572]
+context_128: final_val_loss=1.3467, avg_entropy_per_layer=[0.6115408539772034, 1.1274327039718628]

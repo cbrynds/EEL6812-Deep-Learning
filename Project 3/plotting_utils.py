@@ -1,11 +1,11 @@
-from pathlib import Path
+import os
 
 import matplotlib.pyplot as plt
 import torch
 
-BASE_OUTPUT_DIR = Path(__file__).resolve().parent
-RESULTS_DIR = BASE_OUTPUT_DIR / "results"
-TRANSFORMER_RESULTS_DIR = BASE_OUTPUT_DIR / "transformer_results"
+RESULTS_DIR = "results"
+TRANSFORMER_RESULTS_DIR = "transformer_results"
+VAE_RESULTS_DIR = "vae_results"
 
 
 def series_from_plot_data(plot_data, split, metric_index):
@@ -19,7 +19,7 @@ def series_from_plot_data(plot_data, split, metric_index):
 
 
 def plot_metric(model_plot_data, split, metric_index, title, y_label, filename):
-    RESULTS_DIR.mkdir(exist_ok=True)
+    os.makedirs(RESULTS_DIR, exist_ok=True)
     plt.figure(figsize=(10, 6))
 
     model_labels = ("LSTM", "RNN", "GRU")
@@ -36,7 +36,7 @@ def plot_metric(model_plot_data, split, metric_index, title, y_label, filename):
     plt.grid(True, alpha=0.3)
     plt.legend()
     plt.tight_layout()
-    plt.savefig(RESULTS_DIR / filename, dpi=300, bbox_inches="tight")
+    plt.savefig(f"{RESULTS_DIR}/{filename}", dpi=300, bbox_inches="tight")
     plt.close()
 
 
@@ -49,7 +49,6 @@ def plot_train_loss(lstm_plot_data, rnn_plot_data, gru_plot_data):
         y_label="Loss",
         filename="train_loss.png",
     )
-
 
 def plot_test_loss(lstm_plot_data, rnn_plot_data, gru_plot_data):
     plot_metric(
@@ -83,17 +82,12 @@ def plot_test_accuracy(lstm_plot_data, rnn_plot_data, gru_plot_data):
         filename="test_accuracy.png",
     )
 
-def transformer_results_subdir(subdir=None):
-    output_dir = TRANSFORMER_RESULTS_DIR if subdir is None else TRANSFORMER_RESULTS_DIR / subdir
-    output_dir.mkdir(parents=True, exist_ok=True)
-    return output_dir
-
 def plot_validation_loss_curve(val_history, run_label, num_heads, num_layers, context_length, with_pos_enc=True, with_causal_mask=True):
-    TRANSFORMER_RESULTS_DIR.mkdir(exist_ok=True)
+    os.makedirs(TRANSFORMER_RESULTS_DIR, exist_ok=True)
+    plt.figure(figsize=(8, 5))
     epochs = [point[0] for point in val_history]
     losses = [point[1] for point in val_history]
 
-    plt.figure(figsize=(8, 5))
     plt.plot(epochs, losses, linewidth=2)
     plt.xlabel("Epoch")
     plt.ylabel("Validation Loss")
@@ -107,12 +101,12 @@ def plot_validation_loss_curve(val_history, run_label, num_heads, num_layers, co
     if not with_causal_mask:
         fig_title += "_no_causal_mask"
 
-    plt.savefig(TRANSFORMER_RESULTS_DIR / f"{fig_title}.png", dpi=300, bbox_inches="tight")
+    plt.savefig(f"{TRANSFORMER_RESULTS_DIR}/{fig_title}.png", dpi=300, bbox_inches="tight")
     plt.close()
 
 
 def plot_training_loss_curve(train_history, run_label, num_heads, num_layers, context_length, with_pos_enc=True, with_causal_mask=True):
-    TRANSFORMER_RESULTS_DIR.mkdir(exist_ok=True)
+    os.makedirs(TRANSFORMER_RESULTS_DIR, exist_ok=True)
     epochs = [point[0] for point in train_history]
     losses = [point[1] for point in train_history]
 
@@ -129,12 +123,12 @@ def plot_training_loss_curve(train_history, run_label, num_heads, num_layers, co
     if not with_causal_mask:
         fig_title += "_no_causal_mask"
 
-    plt.savefig(TRANSFORMER_RESULTS_DIR / f"{fig_title}.png", dpi=300, bbox_inches="tight")
+    plt.savefig(f"{TRANSFORMER_RESULTS_DIR}/{fig_title}.png", dpi=300, bbox_inches="tight")
     plt.close()
 
 
 def plot_loss_comparison(run_histories, metric_key, y_label, filename):
-    TRANSFORMER_RESULTS_DIR.mkdir(exist_ok=True)
+    os.makedirs(TRANSFORMER_RESULTS_DIR, exist_ok=True)
     plt.figure(figsize=(9, 5.5))
 
     for run_label, history in run_histories:
@@ -149,14 +143,12 @@ def plot_loss_comparison(run_histories, metric_key, y_label, filename):
     plt.grid(True, alpha=0.3)
     plt.legend()
     plt.tight_layout()
-    plt.savefig(TRANSFORMER_RESULTS_DIR / filename, dpi=300, bbox_inches="tight")
+    plt.savefig(f"{TRANSFORMER_RESULTS_DIR}/{filename}", dpi=300, bbox_inches="tight")
     plt.close()
 
 
 def plot_vae_loss(plot_data, loss_label = "BCE Reconstruction Loss", filename="vae_loss.png"):
-    output_dir = Path(__file__).resolve().parent / "vae_results"
-    output_dir.mkdir(parents=True, exist_ok=True)
-
+    os.makedirs(VAE_RESULTS_DIR, exist_ok=True)
     epochs = list(range(1, len(plot_data) + 1))
     total_loss = [point["loss"] for point in plot_data]
     reconstruction_loss = [point["reconstruction_loss"] for point in plot_data]
@@ -171,14 +163,12 @@ def plot_vae_loss(plot_data, loss_label = "BCE Reconstruction Loss", filename="v
     plt.grid(True, alpha=0.3)
     plt.legend()
     plt.tight_layout()
-    plt.savefig(output_dir / filename, dpi=300, bbox_inches="tight")
+    plt.savefig(f"{VAE_RESULTS_DIR}/{filename}", dpi=300, bbox_inches="tight")
     plt.close()
 
 
 def plot_vae_latent_dim_comparison(run_histories, filename="latent_dim_loss_comparison.png"):
-    output_dir = Path(__file__).resolve().parent / "vae_results"
-    output_dir.mkdir(parents=True, exist_ok=True)
-
+    os.makedirs(VAE_RESULTS_DIR, exist_ok=True)
     plt.figure(figsize=(9, 5.5))
 
     for latent_dim, plot_data in run_histories:
@@ -191,11 +181,11 @@ def plot_vae_latent_dim_comparison(run_histories, filename="latent_dim_loss_comp
     plt.grid(True, alpha=0.3)
     plt.legend()
     plt.tight_layout()
-    plt.savefig(output_dir / filename, dpi=300, bbox_inches="tight")
+    plt.savefig(f"{VAE_RESULTS_DIR}/{filename}", dpi=300, bbox_inches="tight")
     plt.close()
 
 
-def plot_attention(attn_maps, tokens, layer_idx=0, head_idx=0, num_heads=4, num_layers=2, context_length=64, with_pos_enc=True, with_causal_mask=True, output_subdir=None):
+def plot_attention(attn_maps, tokens, layer_idx=0, head_idx=0, num_heads=4, num_layers=2, context_length=64, with_pos_enc=True, with_causal_mask=True, output_subdir="attention_maps"):
     """
     attn_maps[layer_idx]: [1, heads, T, T]
     """
@@ -217,11 +207,11 @@ def plot_attention(attn_maps, tokens, layer_idx=0, head_idx=0, num_heads=4, num_
     if not with_causal_mask:
         fig_title += "_no_causal_mask"
         
-    output_dir = transformer_results_subdir(output_subdir)
-    plt.savefig(output_dir / f"{fig_title}.png", dpi=300, bbox_inches="tight")
+    os.makedirs(f"{TRANSFORMER_RESULTS_DIR}/{output_subdir}", exist_ok=True)
+    plt.savefig(f"{TRANSFORMER_RESULTS_DIR}/{output_subdir}/{fig_title}.png", dpi=300, bbox_inches="tight")
     plt.close()
 
-def plot_avg_attention(attn_maps, tokens, layer_idx=0, num_heads=4, num_layers=2, context_length=64, with_pos_enc=True, with_causal_mask=True, output_subdir=None):
+def plot_avg_attention(attn_maps, tokens, layer_idx=0, num_heads=4, num_layers=2, context_length=64, with_pos_enc=True, with_causal_mask=True, output_subdir="attention_maps"):
     # [1, heads, T, T] -> average over heads -> [T, T]
     attn = attn_maps[layer_idx][0].mean(dim=0)
 
@@ -241,11 +231,11 @@ def plot_avg_attention(attn_maps, tokens, layer_idx=0, num_heads=4, num_layers=2
     if not with_causal_mask:
         fig_title += "_no_causal_mask"
         
-    output_dir = transformer_results_subdir(output_subdir)
-    plt.savefig(output_dir / f"{fig_title}.png", dpi=300, bbox_inches="tight")
+    os.makedirs(f"{TRANSFORMER_RESULTS_DIR}/{output_subdir}", exist_ok=True)
+    plt.savefig(f"{TRANSFORMER_RESULTS_DIR}/{output_subdir}/{fig_title}.png", dpi=300, bbox_inches="tight")
     plt.close()
 
-
+# Based on the equation in the assignment description
 def compute_attention_entropy(attn_maps):
     entropies = []
 

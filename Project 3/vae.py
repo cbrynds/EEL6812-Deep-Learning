@@ -6,8 +6,9 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import os
-from pathlib import Path
 from plotting_utils import plot_vae_loss, plot_vae_latent_dim_comparison
+
+VAE_RESULTS_DIR = "vae_results"
 
 # Define Variational Autoencoder (VAE)
 class VAE(nn.Module):
@@ -59,13 +60,11 @@ def loss_function(criterion,recon_x, x, mu, sigma, beta):
         RECON = criterion(recon_x, target)
     
     KLD = -0.5 * torch.sum(1 + torch.log(sigma.pow(2)) - mu.pow(2) - sigma.pow(2))
+    
     return RECON + beta * KLD, RECON.item(), KLD.item()
 
 # Inference
 def generate_images(vae, latent_dim, device, num_images=10, filename="unconditional_generation.png"):
-    output_dir = Path(__file__).resolve().parent / "vae_results"
-    output_dir.mkdir(parents=True, exist_ok=True)
-    
     vae.eval()
     z = torch.randn(num_images, latent_dim).to(device)
     with torch.no_grad():
@@ -76,7 +75,7 @@ def generate_images(vae, latent_dim, device, num_images=10, filename="unconditio
         plt.imshow(generated_imgs[i].view(28, 28), cmap='gray')
         plt.axis('off')
     plt.tight_layout()
-    plt.savefig(f"{output_dir}/{filename}")
+    plt.savefig(f"{VAE_RESULTS_DIR}/{filename}")
     plt.close()
 
 def find_mnist_image_target(dataloader, target_digit):
@@ -87,24 +86,19 @@ def find_mnist_image_target(dataloader, target_digit):
     return None
 
 def conditional_generate_images(vae, latent_dim, target_digit, dataloader, device="cpu", num_images=10, filename=None):
-    output_dir = Path(__file__).resolve().parent / "vae_results"
-    output_dir.mkdir(parents=True, exist_ok=True)
-    
     vae.eval()
     target_image = find_mnist_image_target(dataloader, target_digit)
-    if target_image is None:
-        raise ValueError(f"No image found for digit {target_digit}")
 
+    # Sample from a normal distribution to match the dimensions of the latent space
     eps = torch.randn(num_images, latent_dim).to(device)
     
+    # Sample mean and stddev from the encoder and generate new image with decoder
     with torch.no_grad():
         mu, sigma = vae.encode(target_image.view(-1, 28*28).to(device))
         z = mu + sigma * eps
-        # z = vae.reparameterize(mu, sigma)
         generated_imgs = vae.decode(z).cpu()
 
-    if filename is None:
-        filename = f"conditional_generation_digit_{target_digit}.png"
+    filename = f"conditional_generation_digit_{target_digit}.png" if filename is None else filename
 
     plt.figure(figsize=(num_images * 1.5, 2))
     for i in range(num_images):
@@ -113,7 +107,7 @@ def conditional_generate_images(vae, latent_dim, target_digit, dataloader, devic
         plt.axis('off')
     plt.tight_layout()
     
-    plt.savefig(f"{output_dir}/{filename}")
+    plt.savefig(f"{VAE_RESULTS_DIR}/{filename}")
     plt.close()
 
 def train(latent_dim=20, device="cpu", criterion=nn.BCELoss(), epochs=20, beta=3):
@@ -148,6 +142,7 @@ def train(latent_dim=20, device="cpu", criterion=nn.BCELoss(), epochs=20, beta=3
 
         print(f"Epoch [{epoch+1}/{epochs}] | Loss: {total_loss/len(dataloader.dataset):.4f}")
 
+    # Name the run based on the criterion and model parameters (e.g. bce_latent_20_beta_3)
     criterion_name = criterion.__class__.__name__.lower().replace("loss", "")
     run_label = f"{criterion_name}_latent_{latent_dim}_beta_{beta}"
 
@@ -173,7 +168,7 @@ def train(latent_dim=20, device="cpu", criterion=nn.BCELoss(), epochs=20, beta=3
     
 
 def main():
-    os.makedirs("vae_results", exist_ok=True)
+    os.makedirs(VAE_RESULTS_DIR, exist_ok=True)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
     latent_dim = 20
